@@ -14,13 +14,24 @@
     <header class="page-simple-header">
       <button class="back-btn" onclick="window.location.href='dashboard.html'">←</button>
       <h2>Result</h2>
+      <button class="btn btn-sm btn-outline" onclick="window.location.href='history.html'" style="margin-left:auto">History</button>
     </header>
 
-    <main class="app-main" id="resultMain"></main>
+    <main class="app-main" id="resultMain">
+      <div class="admin-loading">
+        <div class="admin-spinner"></div>
+        <div class="admin-loading-text">Loading result...</div>
+      </div>
+    </main>
   </div>
 
-  <script src="js/mock-data.js"></script>
+  <div id="toastContainer" class="toast-container"></div>
+  <div id="modalRoot"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
   <script src="js/toast.js"></script>
+  <script src="js/modal.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/results.js"></script>
 </body>
