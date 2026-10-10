@@ -39,32 +39,22 @@
     </div>
 
     <main class="exam-start-main">
-      <!-- Step 1: Exam Type -->
       <section class="exam-section" id="section1">
         <div class="section-label">Choose exam type</div>
-        <div class="exam-type-grid" id="examTypeGrid">
-          <div class="admin-loading" style="grid-column:1/-1">
-            <div class="admin-spinner"></div>
-            <div class="admin-loading-text">Loading...</div>
-          </div>
-        </div>
+        <div class="exam-type-grid" id="examTypeGrid"></div>
       </section>
 
-      <!-- Step 2: Subject -->
       <section class="exam-section" id="section2" style="display:none">
         <div class="section-label">Choose subject</div>
         <div class="subject-grid" id="subjectGrid"></div>
       </section>
 
-      <!-- Step 3: Details -->
       <section class="exam-section" id="section3" style="display:none">
-        <!-- Chapter (only for chapter test) -->
         <div id="chapterBlock" style="display:none; margin-bottom:20px;">
           <div class="section-label">Choose chapter</div>
           <div id="chapterSelectWrapper"></div>
         </div>
 
-        <!-- Difficulty -->
         <div class="subsection" style="margin-bottom:20px;">
           <div class="section-label">Difficulty</div>
           <div class="chip-row" id="difficultyChips">
@@ -74,7 +64,6 @@
           </div>
         </div>
 
-        <!-- Count -->
         <div class="subsection" id="countBlock" style="margin-bottom:20px;">
           <div class="section-label">Number of questions</div>
           <div class="chip-row" id="countChips">
