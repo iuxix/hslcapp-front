@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM ENGINE — Real API + Instant Load
+// EXAM ENGINE — Real API (No loading screens)
 // ============================================================
 
 let state = {
@@ -33,31 +33,29 @@ let state = {
       marked: false,
       visited: false,
     }));
+
+    if (state.questions.length === 0) {
+      showToast("Test has no questions", "error");
+      setTimeout(() => (window.location.href = "exam-start.html"), 2000);
+      return;
+    }
+
     const expiresAt = new Date(parsed.expires_at).getTime();
     state.remainingSec = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
-    console.log("Test loaded:", state.testId, "Q:", state.questions.length);
+
+    document.getElementById("examTitle").textContent = `Test #${state.testId}`;
+    document.getElementById("examSubtitle").textContent =
+      `${state.questions.length} Q • ${Math.floor(state.remainingSec / 60)} min`;
+
+    renderQuestion();
+    updateTimer();
+    startTimer();
+    openQuestionTiming();
+
   } catch (e) {
-    console.error(e);
-    showToast("Invalid test data", "error");
-    return;
-  }
-
-  // IMMEDIATE render
-  document.getElementById("examTitle").textContent = `Test #${state.testId}`;
-  document.getElementById("examSubtitle").textContent =
-    `${state.questions.length} Q • ${Math.floor(state.remainingSec / 60)} min`;
-
-  renderQuestion();
-  updateTimer();
-  startTimer();
-  openQuestionTiming();
-
-  // Hide loading skeleton
-  const loading = document.getElementById("examLoading");
-  if (loading) {
-    loading.style.opacity = "0";
-    loading.style.transition = "opacity 200ms ease";
-    setTimeout(() => loading.remove(), 200);
+    console.error("Exam init error:", e);
+    showToast("Failed to load exam", "error");
+    setTimeout(() => (window.location.href = "exam-start.html"), 2000);
   }
 })();
 
@@ -88,7 +86,7 @@ function renderQuestion() {
   const optsEl = document.getElementById("optionsList");
   optsEl.innerHTML = "";
 
-  q.options.forEach((opt) => {
+  (q.options || []).forEach((opt) => {
     const div = document.createElement("div");
     div.className = "option" + (q.selectedOption === opt.option_label ? " selected" : "");
     div.innerHTML = `
