@@ -1,0 +1,23 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editor
+.vscode/
+.idea/
+*.swp
+
+# Env
+.env
+.env.local
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (agar future me build step aaya)
+node_modules/
+
+# Python (backend baad me add hoga)
+__pycache__/
+*.pyc
