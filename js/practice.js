@@ -1,161 +1,203 @@
 // ============================================================
-// PRACTICE — Phase 2C (FINAL)
-// Subject → Chapter → Difficulty → Count → Start
+// WEAK AREAS PRACTICE — Real API
 // ============================================================
 
-(function () {
-  let session = null;
-  try { session = getSession(); } catch (e) { console.error(e); }
-  if (!session || session.role !== "student") {
-    window.location.href = "index.html";
-    return;
+let weakData = null;
+
+(async function () {
+  if (!requireLogin()) return;
+
+  try {
+    weakData = await StudentAPI.getWeakAreas();
+    renderPractice();
+  } catch (e) {
+    console.error(e);
+    document.getElementById("practiceMain").innerHTML = `
+      <div class="admin-empty">
+        <div class="admin-empty-icon">❌</div>
+        <div class="admin-empty-title">Failed to load</div>
+        <div class="admin-empty-text">${escapeHtml(e.message)}</div>
+      </div>`;
   }
-
-  const main = document.getElementById("practiceMain");
-  if (!main) return;
-
-  main.innerHTML = `
-    <section class="section">
-      <h3 class="section-title">📚 Full Subject Test</h3>
-      <p style="font-size:13px;color:var(--color-text-muted);margin-bottom:12px">
-        Complete syllabus test for a subject
-      </p>
-      <div class="action-grid" id="subjectGrid"></div>
-    </section>
-
-    <section class="section">
-      <h3 class="section-title">⚡ Quick Practice</h3>
-      <div class="action-grid">
-        <div class="action-card" onclick="quickPractice('science', 10, 15)">
-          <span class="action-icon">⚡</span>
-          <span class="action-title">Quick 10</span>
-          <span class="action-sub">Science • 10Q • 15min</span>
-        </div>
-        <div class="action-card" onclick="quickPractice('science', 20, 30)">
-          <span class="action-icon">📝</span>
-          <span class="action-title">Medium 20</span>
-          <span class="action-sub">Science • 20Q • 30min</span>
-        </div>
-        <div class="action-card" onclick="quickPractice('science', 30, 45)">
-          <span class="action-icon">🔥</span>
-          <span class="action-title">Full 30</span>
-          <span class="action-sub">Science • 30Q • 45min</span>
-        </div>
-        <div class="action-card" onclick="startEasyOnly()">
-          <span class="action-icon">🌱</span>
-          <span class="action-title">Easy Only</span>
-          <span class="action-sub">Build confidence</span>
-        </div>
-      </div>
-    </section>
-
-    <section class="section">
-      <h3 class="section-title">📖 Chapter-wise Test</h3>
-      <div class="info-card">
-        <label style="font-size:13px;font-weight:600;display:block;margin-bottom:8px">Subject</label>
-        <select class="select-full" id="subjectSelect" onchange="updateChapterDropdown()">
-          <option value="">-- Choose subject --</option>
-          ${MOCK.subjects.map((s) => `<option value="${s.id}">${s.name}</option>`).join("")}
-        </select>
-
-        <label style="font-size:13px;font-weight:600;display:block;margin:12px 0 8px">Chapter</label>
-        <select class="select-full" id="chapterSelect">
-          <option value="">-- First choose subject --</option>
-        </select>
-
-        <label style="font-size:13px;font-weight:600;display:block;margin:12px 0 8px">Difficulty</label>
-        <select class="select-full" id="difficultySelect">
-          <option value="mixed">Mixed (Easy + Hard)</option>
-          <option value="easy">All Easy</option>
-          <option value="hard">All Hard</option>
-        </select>
-
-        <label style="font-size:13px;font-weight:600;display:block;margin:12px 0 8px">Question Count</label>
-        <select class="select-full" id="countSelect">
-          <option value="5">5 Questions</option>
-          <option value="10" selected>10 Questions</option>
-          <option value="15">15 Questions</option>
-          <option value="30">30 Questions</option>
-        </select>
-
-        <button class="btn btn-primary btn-block" style="margin-top:16px" onclick="startChapterPractice()">
-          Start Chapter Test
-        </button>
-      </div>
-    </section>
-  `;
-
-  // Render subject cards
-  const subjGrid = document.getElementById("subjectGrid");
-  MOCK.subjects.forEach((s) => {
-    const totalQ = MOCK.questions.filter((q) => q.subject_id === s.id).length;
-    const icon = s.name === "Science" ? "🔬" : s.name === "Mathematics" ? "📐" : "📚";
-
-    const card = document.createElement("div");
-    card.className = "action-card";
-    card.onclick = () => startSubjectTest(s.id);
-    card.innerHTML = `
-      <span class="action-icon">${icon}</span>
-      <span class="action-title">${s.name}</span>
-      <span class="action-sub">${totalQ}Q • Full syllabus</span>
-    `;
-    subjGrid.appendChild(card);
-  });
 })();
 
-// -------- Update chapters based on subject --------
-function updateChapterDropdown() {
-  const subjectId = parseInt(document.getElementById("subjectSelect").value);
-  const chapterSel = document.getElementById("chapterSelect");
+function renderPractice() {
+  const main = document.getElementById("practiceMain");
+  const weakest = weakData.weakest_chapters || [];
 
-  if (!subjectId) {
-    chapterSel.innerHTML = `<option value="">-- First choose subject --</option>`;
+  if (weakest.length === 0) {
+    main.innerHTML = `
+      <div class="admin-empty">
+        <div class="admin-empty-icon">🎯</div>
+        <div class="admin-empty-title">No weak areas yet</div>
+        <div class="admin-empty-text">Take a few tests and we'll identify weak chapters for you</div>
+        <button class="btn btn-primary" style="margin-top:16px" onclick="window.location.href='exam-start.html'">Take a Test</button>
+      </div>`;
     return;
   }
 
-  const subject = MOCK.subjects.find((s) => s.id === subjectId);
-  if (!subject) return;
+  main.innerHTML = `
+    <div class="info-card" style="margin-bottom:20px;background:linear-gradient(135deg,#EEF2FF,#E0E7FF);border:none">
+      <div style="display:flex;align-items:center;gap:12px">
+        <span style="font-size:32px">🎯</span>
+        <div>
+          <div style="font-size:14px;font-weight:800;color:var(--color-primary)">Focus on these chapters</div>
+          <div style="font-size:12px;color:var(--color-text-muted);margin-top:2px">Targeted practice based on your performance</div>
+        </div>
+      </div>
+    </div>
 
-  let html = `<option value="">-- Choose chapter --</option>`;
-  subject.sections.forEach((sec) => {
-    html += `<optgroup label="— ${sec.name} —">`;
-    sec.chapters.forEach((c) => {
-      const qCount = MOCK.questions.filter((q) => q.chapter_id === c.id).length;
-      const disabled = qCount === 0 ? "disabled" : "";
-      const label = qCount === 0 ? `${c.name} (no questions)` : `${c.name} (${qCount}Q)`;
-      html += `<option value="${c.id}" ${disabled}>${label}</option>`;
-    });
-    html += `</optgroup>`;
-  });
-  chapterSel.innerHTML = html;
+    <section class="section">
+      <h3 class="section-title">🎯 Weakest Chapters</h3>
+      <div id="weakList">
+        ${weakest.map((c, i) => {
+          const cls = c.accuracy >= 70 ? "good" : c.accuracy >= 40 ? "mid" : "bad";
+          return `
+            <div class="info-card" style="margin-bottom:12px">
+              <div class="info-row">
+                <div style="flex:1;min-width:0">
+                  <div style="font-size:14px;font-weight:800;margin-bottom:4px">${i + 1}. ${escapeHtml(c.chapter_name)}</div>
+                  <div style="font-size:12px;color:var(--color-text-muted);margin-bottom:6px">
+                    ${c.correct}/${c.total_attempted} correct · ${Math.round(c.accuracy)}% accuracy
+                  </div>
+                  <div class="bar-track">
+                    <div class="bar-fill ${cls}" style="width:${c.accuracy}%"></div>
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-primary btn-block" style="margin-top:12px" onclick="practiceChapter(${c.chapter_id})">
+                📖 Practice ${escapeHtml(c.chapter_name)}
+              </button>
+            </div>
+          `;
+        }).join("")}
+      </div>
+    </section>
+
+    <section class="section">
+      <button class="btn btn-outline btn-block" onclick="practiceAll()">
+        ⚡ Practice All Weak Chapters
+      </button>
+    </section>
+  `;
 }
 
-// -------- Start Chapter Test --------
-function startChapterPractice() {
-  const subjectId = document.getElementById("subjectSelect").value;
-  const chapterId = document.getElementById("chapterSelect").value;
-  const difficulty = document.getElementById("difficultySelect").value;
-  const count = document.getElementById("countSelect").value;
+async function practiceChapter(chapterId) {
+  showToast("Starting practice...", "info", 1000);
 
-  if (!subjectId || !chapterId) {
-    alert("Please select subject and chapter");
-    return;
+  // We need the subject_id for this chapter — get from chapters API
+  try {
+    const chapter = await PublicAPI.getChapter(chapterId);
+
+    // Find subject_id — chapter has section, section has subject
+    // For simplicity, we need to fetch it differently
+    // Let's use first subject as fallback
+    const subjects = await PublicAPI.listSubjects();
+
+    // Try each subject to find which has this chapter
+    let foundSubjectId = null;
+    for (const s of subjects) {
+      try {
+        const full = await PublicAPI.getSubject(s.id);
+        for (const sec of full.sections || []) {
+          for (const ch of sec.chapters || []) {
+            if (ch.id === chapterId) {
+              foundSubjectId = s.id;
+              break;
+            }
+          }
+          if (foundSubjectId) break;
+        }
+        if (foundSubjectId) break;
+      } catch (e) {
+        continue;
+      }
+    }
+
+    if (!foundSubjectId) {
+      showToast("Could not find subject for this chapter", "error");
+      return;
+    }
+
+    const payload = {
+      exam_type: "chapter",
+      subject_id: foundSubjectId,
+      chapter_ids: [chapterId],
+      difficulty: "mixed",
+      count: 15,
+      duration_minutes: 15,
+    };
+
+    const response = await ExamAPI.start(payload);
+    localStorage.setItem("currentTestId", response.test_id);
+    localStorage.setItem("currentTestData", JSON.stringify(response));
+    window.location.href = "exam.html";
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || "Failed to start", "error");
   }
-
-  window.location.href = `exam.html?type=chapter&subject=${subjectId}&chapter=${chapterId}&difficulty=${difficulty}&count=${count}&duration=${count}`;
 }
 
-// -------- Quick Practice (Science default) --------
-function quickPractice(subjectKey, count, duration) {
-  window.location.href = `exam.html?type=full&subject=1&difficulty=mixed&count=${count}&duration=${duration}`;
+async function practiceAll() {
+  const chapters = weakData.weakest_chapters || [];
+  if (chapters.length === 0) { showToast("No weak chapters", "error"); return; }
+
+  // Find subject for first chapter
+  const chapterIds = chapters.map((c) => c.chapter_id);
+
+  try {
+    const subjects = await PublicAPI.listSubjects();
+    let foundSubjectId = null;
+
+    for (const s of subjects) {
+      try {
+        const full = await PublicAPI.getSubject(s.id);
+        for (const sec of full.sections || []) {
+          for (const ch of sec.chapters || []) {
+            if (chapterIds.includes(ch.id)) {
+              foundSubjectId = s.id;
+              break;
+            }
+          }
+          if (foundSubjectId) break;
+        }
+        if (foundSubjectId) break;
+      } catch (e) {
+        continue;
+      }
+    }
+
+    if (!foundSubjectId) {
+      showToast("Could not find subjects", "error");
+      return;
+    }
+
+    showToast("Starting practice...", "info", 1000);
+
+    const payload = {
+      exam_type: "chapter",
+      subject_id: foundSubjectId,
+      chapter_ids: chapterIds,
+      difficulty: "mixed",
+      count: 30,
+      duration_minutes: 30,
+    };
+
+    const response = await ExamAPI.start(payload);
+    localStorage.setItem("currentTestId", response.test_id);
+    localStorage.setItem("currentTestData", JSON.stringify(response));
+    setTimeout(() => (window.location.href = "exam.html"), 400);
+  } catch (error) {
+    console.error(error);
+    showToast(error.message || "Failed to start", "error");
+  }
 }
 
-// -------- Easy Only --------
-function startEasyOnly() {
-  window.location.href = `exam.html?type=full&subject=1&difficulty=easy&count=10&duration=15`;
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
 }
 
-// -------- Full Subject Test --------
-function startSubjectTest(subjectId) {
-  window.location.href = `exam.html?type=subject&subject=${subjectId}&difficulty=mixed&count=30&duration=45`;
-}
+window.practiceChapter = practiceChapter;
+window.practiceAll = practiceAll;
