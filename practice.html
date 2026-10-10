@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Practice — SEBA HSLC</title>
+  <title>Weak Areas — SEBA HSLC</title>
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
@@ -11,22 +11,26 @@
 </head>
 <body>
   <div class="app-shell">
-    <header class="app-header">
-      <div class="header-top">
-        <div class="header-greeting"><h2>📝 Practice</h2><p>Configure your test</p></div>
-        <div class="header-avatar" id="userAvatar">S</div>
-      </div>
+    <header class="page-simple-header">
+      <button class="back-btn" onclick="window.location.href='dashboard.html'">←</button>
+      <h2>Weak Areas</h2>
     </header>
-    <main class="app-main" id="practiceMain"></main>
-    <nav class="bottom-nav">
-      <a class="nav-item" href="dashboard.html"><span class="nav-icon">🏠</span><span>Home</span></a>
-      <a class="nav-item active" href="practice.html"><span class="nav-icon">📝</span><span>Practice</span></a>
-      <a class="nav-item" href="mistakes.html"><span class="nav-icon">❌</span><span>Mistakes</span></a>
-      <a class="nav-item" href="history.html"><span class="nav-icon">📜</span><span>History</span></a>
-      <a class="nav-item" href="profile.html"><span class="nav-icon">👤</span><span>Profile</span></a>
-    </nav>
+
+    <main class="app-main" id="practiceMain">
+      <div class="admin-loading">
+        <div class="admin-spinner"></div>
+        <div class="admin-loading-text">Analyzing your performance...</div>
+      </div>
+    </main>
   </div>
-  <script src="js/mock-data.js"></script>
+
+  <div id="toastContainer" class="toast-container"></div>
+  <div id="modalRoot"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/modal.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/practice.js"></script>
 </body>
