@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM ENGINE — Real API + Fixed
+// EXAM ENGINE — Real API + Instant Load
 // ============================================================
 
 let state = {
@@ -35,13 +35,14 @@ let state = {
     }));
     const expiresAt = new Date(parsed.expires_at).getTime();
     state.remainingSec = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
-    console.log("Test loaded:", state.testId, "Questions:", state.questions.length, "Remaining:", state.remainingSec);
+    console.log("Test loaded:", state.testId, "Q:", state.questions.length);
   } catch (e) {
     console.error(e);
     showToast("Invalid test data", "error");
     return;
   }
 
+  // IMMEDIATE render
   document.getElementById("examTitle").textContent = `Test #${state.testId}`;
   document.getElementById("examSubtitle").textContent =
     `${state.questions.length} Q • ${Math.floor(state.remainingSec / 60)} min`;
@@ -50,6 +51,14 @@ let state = {
   updateTimer();
   startTimer();
   openQuestionTiming();
+
+  // Hide loading skeleton
+  const loading = document.getElementById("examLoading");
+  if (loading) {
+    loading.style.opacity = "0";
+    loading.style.transition = "opacity 200ms ease";
+    setTimeout(() => loading.remove(), 200);
+  }
 })();
 
 // ============================================================
@@ -79,7 +88,7 @@ function renderQuestion() {
   const optsEl = document.getElementById("optionsList");
   optsEl.innerHTML = "";
 
-  q.options.forEach((opt, idx) => {
+  q.options.forEach((opt) => {
     const div = document.createElement("div");
     div.className = "option" + (q.selectedOption === opt.option_label ? " selected" : "");
     div.innerHTML = `
@@ -285,7 +294,6 @@ function confirmSubmit() {
     });
   } catch (e) {
     console.error("confirmSubmit error:", e);
-    alert("Submit error: " + e.message);
   }
 }
 
