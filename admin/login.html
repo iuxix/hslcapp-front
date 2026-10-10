@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Login — SEBA HSLC</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/auth.css" />
+</head>
+<body class="auth-body admin-auth-body">
+  <div class="auth-shell">
+    <div class="auth-brand">
+      <div class="brand-logo admin-logo">🛡️</div>
+      <h1 class="brand-name">Admin Access</h1>
+      <p class="brand-tag">Restricted area</p>
+    </div>
+
+    <div class="auth-card admin-card">
+      <div class="auth-card-header">
+        <h2>Admin Login</h2>
+        <p>Authorized personnel only</p>
+      </div>
+
+      <form id="adminLoginForm" class="auth-form">
+        <div class="input-group">
+          <label for="adminUsername">Username</label>
+          <div class="input-wrap">
+            <span class="input-icon">👤</span>
+            <input
+              type="text"
+              id="adminUsername"
+              placeholder="Admin username"
+              autocomplete="username"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="adminPassword">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input
+              type="password"
+              id="adminPassword"
+              placeholder="Admin password"
+              autocomplete="current-password"
+              required
+            />
+          </div>
+        </div>
+
+        <div id="adminLoginError" class="form-error" hidden></div>
+
+        <button type="submit" class="btn btn-admin btn-block btn-lg">
+          Access Admin Panel
+        </button>
+      </form>
+
+      <div class="auth-footer admin-footer">
+        <a href="../index.html">← Back to student login</a>
+      </div>
+    </div>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/toast.js"></script>
+  <script src="../js/modal.js"></script>
+  <script src="../js/auth.js"></script>
+</body>
+</html>

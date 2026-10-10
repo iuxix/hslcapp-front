@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — SEBA HSLC</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+  <link rel="stylesheet" href="../css/custom-select.css" />
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div class="admin-header-top">
+        <div class="admin-header-title">
+          <div>
+            <h2>🛡️ Admin Panel</h2>
+            <p id="adminName">Welcome</p>
+          </div>
+        </div>
+        <button class="admin-btn-icon" onclick="logout()" style="background:rgba(255,255,255,0.12);color:#fff;width:40px;height:40px;border-radius:var(--radius-md)">
+          ⏻
+        </button>
+      </div>
+
+      <div class="admin-header-stats">
+        <div class="admin-stat">
+          <div class="v" id="statUsers">...</div>
+          <div class="l">Users</div>
+        </div>
+        <div class="admin-stat">
+          <div class="v" id="statSubjects">...</div>
+          <div class="l">Subjects</div>
+        </div>
+        <div class="admin-stat">
+          <div class="v" id="statQuestions">...</div>
+          <div class="l">Questions</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-main">
+      <section class="admin-section">
+        <button class="action-box action-box-primary action-box-large" onclick="goTo('users.html')">
+          <div class="box-icon">👥</div>
+          <div class="box-content">
+            <div class="box-title-large">Users</div>
+            <div class="box-sub-large">Manage students and admins</div>
+          </div>
+          <div class="box-arrow">→</div>
+        </button>
+      </section>
+
+      <section class="admin-section">
+        <div class="box-grid-2">
+          <button class="action-box action-box-teal" onclick="goTo('curriculum.html')">
+            <div class="box-icon">📚</div>
+            <div class="box-title">Curriculum</div>
+            <div class="box-sub">Subjects & chapters</div>
+          </button>
+          <button class="action-box action-box-amber" onclick="goTo('questions.html')">
+            <div class="box-icon">❓</div>
+            <div class="box-title">Questions</div>
+            <div class="box-sub">Add & manage</div>
+          </button>
+        </div>
+      </section>
+
+      <section class="admin-section">
+        <div class="box-grid-2">
+          <button class="action-box action-box-rose" onclick="goTo('ai.html')">
+            <div class="box-icon">🤖</div>
+            <div class="box-title">AI Gen</div>
+            <div class="box-sub">Auto questions</div>
+          </button>
+          <button class="action-box action-box-purple" onclick="goTo('material.html')">
+            <div class="box-icon">📖</div>
+            <div class="box-title">Material</div>
+            <div class="box-sub">Study content</div>
+          </button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+  <div id="modalRoot"></div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/toast.js"></script>
+  <script src="../js/modal.js"></script>
+  <script src="../js/custom-select.js"></script>
+  <script src="../js/auth.js"></script>
+  <script src="../js/admin-dashboard.js"></script>
+</body>
+</html>
