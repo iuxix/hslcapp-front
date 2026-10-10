@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM ENGINE — Real API + Smooth Animations
+// EXAM ENGINE — Real API + Fixed
 // ============================================================
 
 let state = {
@@ -13,6 +13,8 @@ let state = {
 };
 
 (function () {
+  console.log("exam.js loaded");
+
   if (!requireLogin()) return;
 
   const testData = localStorage.getItem("currentTestData");
@@ -33,6 +35,7 @@ let state = {
     }));
     const expiresAt = new Date(parsed.expires_at).getTime();
     state.remainingSec = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
+    console.log("Test loaded:", state.testId, "Questions:", state.questions.length, "Remaining:", state.remainingSec);
   } catch (e) {
     console.error(e);
     showToast("Invalid test data", "error");
@@ -50,7 +53,7 @@ let state = {
 })();
 
 // ============================================================
-// RENDER — smooth question transitions
+// RENDER
 // ============================================================
 
 function renderQuestion() {
@@ -59,11 +62,10 @@ function renderQuestion() {
 
   q.visited = true;
 
-  // Animate question card
   const card = document.querySelector(".question-card");
   if (card) {
     card.style.animation = "none";
-    void card.offsetWidth; // force reflow
+    void card.offsetWidth;
     card.style.animation = "";
   }
 
@@ -80,7 +82,6 @@ function renderQuestion() {
   q.options.forEach((opt, idx) => {
     const div = document.createElement("div");
     div.className = "option" + (q.selectedOption === opt.option_label ? " selected" : "");
-    div.style.animationDelay = `${idx * 40}ms`;
     div.innerHTML = `
       <div class="option-label">${opt.option_label}</div>
       <div class="option-text">${escapeHtml(opt.option_text)}</div>
@@ -109,7 +110,6 @@ function selectOption(label) {
   const q = state.questions[state.currentIndex];
   q.selectedOption = label;
 
-  // Smooth update — only toggle classes
   document.querySelectorAll("#optionsList .option").forEach((div, i) => {
     const opt = q.options[i];
     div.classList.toggle("selected", opt.option_label === label);
@@ -200,6 +200,7 @@ function closeCurrentTiming() {
 
 function renderPalette() {
   const grid = document.getElementById("paletteGrid");
+  if (!grid) return;
   grid.innerHTML = "";
 
   state.questions.forEach((q, i) => {
@@ -225,6 +226,7 @@ function renderPalette() {
 
 function togglePalette(force) {
   const sheet = document.getElementById("paletteSheet");
+  if (!sheet) return;
   const open = force !== undefined ? force : !sheet.classList.contains("open");
   if (open) sheet.classList.add("open");
   else sheet.classList.remove("open");
@@ -237,6 +239,7 @@ function togglePalette(force) {
 const timerEl = document.getElementById("timer");
 
 function updateTimer() {
+  if (!timerEl) return;
   const mins = Math.floor(state.remainingSec / 60);
   const secs = state.remainingSec % 60;
   timerEl.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
@@ -262,23 +265,28 @@ function startTimer() {
 // ============================================================
 
 function confirmSubmit() {
-  const answered = state.questions.filter((q) => q.selectedOption).length;
-  const notAnswered = state.questions.length - answered;
-  const marked = state.questions.filter((q) => q.marked).length;
+  try {
+    const answered = state.questions.filter((q) => q.selectedOption).length;
+    const notAnswered = state.questions.length - answered;
+    const marked = state.questions.filter((q) => q.marked).length;
 
-  showModal({
-    title: "Submit Test?",
-    content: "Once submitted, you cannot change your answers.",
-    stats: [
-      { value: answered, label: "Answered", color: "var(--color-success)" },
-      { value: notAnswered, label: "Not answered", color: "var(--color-danger)" },
-      { value: marked, label: "Marked", color: "var(--color-accent)" },
-    ],
-    actions: [
-      { label: "Cancel", style: "outline", onClick: "closeModal()" },
-      { label: "Yes, Submit", style: "primary", onClick: "window.__doSubmit()" },
-    ],
-  });
+    showModal({
+      title: "Submit Test?",
+      content: "Once submitted, you cannot change your answers.",
+      stats: [
+        { value: answered, label: "Answered", color: "var(--color-success)" },
+        { value: notAnswered, label: "Not answered", color: "var(--color-danger)" },
+        { value: marked, label: "Marked", color: "var(--color-accent)" },
+      ],
+      actions: [
+        { label: "Cancel", style: "outline", onClick: "closeModal()" },
+        { label: "Yes, Submit", style: "primary", onClick: "window.__doSubmit()" },
+      ],
+    });
+  } catch (e) {
+    console.error("confirmSubmit error:", e);
+    alert("Submit error: " + e.message);
+  }
 }
 
 window.__doSubmit = function () {
@@ -293,6 +301,7 @@ async function submitTest(auto) {
   closeCurrentTiming();
 
   try {
+    showToast("Submitting...", "info", 1000);
     await ExamAPI.submit(state.testId);
     localStorage.removeItem("currentTestData");
     localStorage.removeItem("currentTestId");
@@ -306,31 +315,35 @@ async function submitTest(auto) {
 }
 
 // ============================================================
-// EXIT / PAUSE
+// EXIT
 // ============================================================
 
 function confirmExit() {
-  showModal({
-    title: "Pause Exam?",
-    content: "Your answers are already saved to the server.",
-    customContent: `
-      <button class="exit-option" onclick="window.__saveAndExit()">
-        <span class="exit-icon">💾</span>
-        <span class="exit-info">
-          <span class="exit-title">Save & Exit</span>
-          <span class="exit-sub">Your progress is saved. Resume later.</span>
-        </span>
-      </button>
-      <button class="exit-option danger" onclick="closeModal()">
-        <span class="exit-icon">✕</span>
-        <span class="exit-info">
-          <span class="exit-title">Stay on Exam</span>
-          <span class="exit-sub">Cancel and continue the test.</span>
-        </span>
-      </button>
-    `,
-    actions: [],
-  });
+  try {
+    showModal({
+      title: "Pause Exam?",
+      content: "Your answers are already saved to the server.",
+      customContent: `
+        <button class="exit-option" onclick="window.__saveAndExit()">
+          <span class="exit-icon">💾</span>
+          <span class="exit-info">
+            <span class="exit-title">Save & Exit</span>
+            <span class="exit-sub">Your progress is saved. Resume later.</span>
+          </span>
+        </button>
+        <button class="exit-option danger" onclick="closeModal()">
+          <span class="exit-icon">✕</span>
+          <span class="exit-info">
+            <span class="exit-title">Stay on Exam</span>
+            <span class="exit-sub">Cancel and continue the test.</span>
+          </span>
+        </button>
+      `,
+      actions: [],
+    });
+  } catch (e) {
+    console.error("confirmExit error:", e);
+  }
 }
 
 window.__saveAndExit = function () {
