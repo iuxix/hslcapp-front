@@ -7,6 +7,7 @@
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/exam-start.css" />
+  <link rel="stylesheet" href="css/custom-select.css" />
 </head>
 <body>
   <div class="exam-start-shell">
@@ -38,29 +39,33 @@
     </div>
 
     <main class="exam-start-main">
+      <!-- Step 1: Exam Type -->
       <section class="exam-section" id="section1">
         <div class="section-label">Choose exam type</div>
-        <div class="exam-type-grid" id="examTypeGrid"></div>
+        <div class="exam-type-grid" id="examTypeGrid">
+          <div class="admin-loading" style="grid-column:1/-1">
+            <div class="admin-spinner"></div>
+            <div class="admin-loading-text">Loading...</div>
+          </div>
+        </div>
       </section>
 
+      <!-- Step 2: Subject -->
       <section class="exam-section" id="section2" style="display:none">
         <div class="section-label">Choose subject</div>
         <div class="subject-grid" id="subjectGrid"></div>
       </section>
 
+      <!-- Step 3: Details -->
       <section class="exam-section" id="section3" style="display:none">
-        <div id="chapterBlock" style="display:none">
+        <!-- Chapter (only for chapter test) -->
+        <div id="chapterBlock" style="display:none; margin-bottom:20px;">
           <div class="section-label">Choose chapter</div>
-          <div class="chapter-selector" id="chapterSelector">
-            <button class="chapter-trigger placeholder" id="chapterTrigger" onclick="toggleChapterList()">
-              <span id="chapterTriggerText">Select a chapter</span>
-              <span class="chapter-arrow">▾</span>
-            </button>
-            <div class="chapter-list" id="chapterList"></div>
-          </div>
+          <div id="chapterSelectWrapper"></div>
         </div>
 
-        <div class="subsection">
+        <!-- Difficulty -->
+        <div class="subsection" style="margin-bottom:20px;">
           <div class="section-label">Difficulty</div>
           <div class="chip-row" id="difficultyChips">
             <button class="chip active" data-diff="mixed" onclick="selectDifficulty(this)">Mixed</button>
@@ -69,13 +74,15 @@
           </div>
         </div>
 
-        <div class="subsection" id="countBlock">
+        <!-- Count -->
+        <div class="subsection" id="countBlock" style="margin-bottom:20px;">
           <div class="section-label">Number of questions</div>
           <div class="chip-row" id="countChips">
             <button class="chip" data-count="5" onclick="selectCount(this)">5</button>
             <button class="chip" data-count="10" onclick="selectCount(this)">10</button>
             <button class="chip" data-count="20" onclick="selectCount(this)">20</button>
-            <button class="chip active" data-count="45" onclick="selectCount(this)">45</button>
+            <button class="chip active" data-count="30" onclick="selectCount(this)">30</button>
+            <button class="chip" data-count="45" onclick="selectCount(this)">45</button>
           </div>
         </div>
       </section>
@@ -84,13 +91,20 @@
     <footer class="exam-start-footer" id="footerCta" style="display:none">
       <div class="footer-info">
         <div class="footer-info-label">Ready to start</div>
-        <div class="footer-info-value" id="footerInfo">45 Q • 45 min • Mixed</div>
+        <div class="footer-info-value" id="footerInfo">30 Q • 30 min • Mixed</div>
       </div>
       <button class="btn btn-primary" onclick="beginExam()">Begin →</button>
     </footer>
   </div>
 
-  <script src="js/mock-data.js"></script>
+  <div id="toastContainer" class="toast-container"></div>
+  <div id="modalRoot"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/custom-select.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/exam-start.js"></script>
 </body>
