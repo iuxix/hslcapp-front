@@ -1,38 +1,60 @@
 // ============================================================
-// EXAM START — Full Page Flow
+// EXAM START — 5 Exam Types (No duplicates)
 // ============================================================
 
+let state = {
+  examType: null,
+  subjects: [],
+  subjectId: null,
+  sections: [],
+  chapters: [],
+  chapterIds: [],
+  difficulty: "mixed",
+  count: 30,
+};
+
 (function () {
-  const session = getSession();
-  if (!session || session.role !== "student") {
-    window.location.href = "index.html";
-    return;
+  if (!requireLogin()) return;
+  loadSubjectsAndRender();
+  updateStepper(1);
+})();
+
+async function loadSubjectsAndRender() {
+  try {
+    const subjects = await PublicAPI.listSubjects();
+    state.subjects = subjects || [];
+  } catch (e) {
+    console.error("Load subjects error:", e);
+    showToast("Failed to load subjects", "error");
+    state.subjects = [];
   }
+  renderExamTypes();
+}
 
-  const state = {
-    examType: null,
-    subjectId: null,
-    chapterId: null,
-    difficulty: "mixed",
-    count: 45,
-  };
+// ============================================================
+// 5 EXAM TYPES
+// ============================================================
 
-  const examTypes = [
-    { id: "full", icon: "📝", title: "Full MCQ Test", sub: "All chapters, mixed", bg: "#EEF2FF" },
-    { id: "chapter", icon: "📖", title: "Chapter Test", sub: "Pick a chapter", bg: "#CCFBF1" },
-    { id: "ai", icon: "🤖", title: "AI Generated", sub: "Fresh questions", bg: "#F3E8FF", disabled: true },
-    { id: "hots", icon: "💡", title: "HOTS", sub: "Higher order thinking", bg: "#FEF3C7", disabled: true },
-    { id: "theory", icon: "📚", title: "Theory Test", sub: "Long answers", bg: "#EEF2F7", disabled: true },
+function renderExamTypes() {
+  const types = [
+    { id: "full", icon: "📝", title: "Full Test", sub: "All chapters, mixed", bg: "#EEF2FF" },
+    { id: "chapter", icon: "📖", title: "Chapter Test", sub: "Pick specific chapters", bg: "#CCFBF1" },
+    { id: "ai", icon: "🤖", title: "AI Generated", sub: "Coming soon", bg: "#F3E8FF", disabled: true },
+    { id: "hots", icon: "💡", title: "HOTS", sub: "Coming soon", bg: "#FEF3C7", disabled: true },
+    { id: "theory", icon: "📚", title: "Theory Test", sub: "Coming soon", bg: "#EEF2F7", disabled: true },
   ];
 
-  const typeGrid = document.getElementById("examTypeGrid");
-  examTypes.forEach((t) => {
+  const grid = document.getElementById("examTypeGrid");
+  grid.innerHTML = "";
+
+  types.forEach((t) => {
     const card = document.createElement("button");
     card.className = "exam-type-card";
     card.dataset.type = t.id;
+    card.style.position = "relative";
     card.onclick = () => {
       if (t.disabled) {
-        alert(`${t.title} — coming soon in future phase!`);
+        showToast(`${t.title} — coming in next update!`, "info", 2500);
         return;
       }
       selectExamType(t.id);
@@ -41,211 +63,249 @@
       <div class="exam-type-icon" style="background:${t.bg}">${t.icon}</div>
       <div class="exam-type-title">${t.title}</div>
       <div class="exam-type-sub">${t.sub}</div>
+      ${t.disabled ? '<div class="badge badge-warning" style="position:absolute;top:8px;right:8px;font-size:9px">SOON</div>' : ""}
     `;
-    typeGrid.appendChild(card);
+    grid.appendChild(card);
+  });
+}
+
+function selectExamType(type) {
+  state.examType = type;
+  document.querySelectorAll(".exam-type-card").forEach((c) => {
+    c.classList.toggle("selected", c.dataset.type === type);
+  });
+  updateStepper(2);
+  showSubjectSection();
+  updateFooter();
+}
+
+// ============================================================
+// SUBJECTS
+// ============================================================
+
+function showSubjectSection() {
+  document.getElementById("section2").style.display = "block";
+  const grid = document.getElementById("subjectGrid");
+  grid.innerHTML = "";
+
+  if (state.subjects.length === 0) {
+    grid.innerHTML = `
+      <div style="grid-column:1/-1" class="admin-empty">
+        <div class="admin-empty-icon">📚</div>
+        <div class="admin-empty-title">No subjects</div>
+        <div class="admin-empty-text">Ask admin to add subjects</div>
+      </div>`;
+    return;
+  }
+
+  state.subjects.forEach((s) => {
+    const icon = getSubjectIcon(s.code);
+    const btn = document.createElement("button");
+    btn.className = "subject-card";
+    btn.dataset.subject = s.id;
+    btn.onclick = () => selectSubject(s.id);
+    btn.innerHTML = `
+      <div class="subject-icon">${icon}</div>
+      <div class="subject-name">${escapeHtml(s.name)}</div>
+      <div class="subject-meta">${escapeHtml(s.code)}</div>
+    `;
+    grid.appendChild(btn);
+  });
+}
+
+function getSubjectIcon(code) {
+  const icons = { SCI: "🔬", MATH: "📐", ADVMATH: "🧮", ASM: "📖", ENG: "📘", SOC: "🌍" };
+  return icons[code] || "📚";
+}
+
+async function selectSubject(subjectId) {
+  state.subjectId = subjectId;
+  state.chapterIds = [];
+
+  document.querySelectorAll(".subject-card").forEach((c) => {
+    c.classList.toggle("selected", parseInt(c.dataset.subject) === subjectId);
   });
 
-  function updateStepper(step) {
-    document.querySelectorAll(".step").forEach((s) => {
-      const num = parseInt(s.dataset.step);
-      s.classList.remove("active", "done");
-      if (num === step) s.classList.add("active");
-      else if (num < step) s.classList.add("done");
-    });
-    document.querySelectorAll(".step-line").forEach((line, i) => {
-      line.classList.toggle("done", i < step - 1);
-    });
-  }
-
-  function selectExamType(type) {
-    state.examType = type;
-    document.querySelectorAll(".exam-type-card").forEach((c) => {
-      c.classList.toggle("selected", c.dataset.type === type);
-    });
-
-    if (type === "full" || type === "chapter") {
-      updateStepper(2);
-      showSubjectSection();
-    } else {
-      updateStepper(3);
-      document.getElementById("section3").style.display = "block";
-      document.getElementById("countBlock").style.display = "block";
-    }
-    updateFooter();
-  }
-
-  function showSubjectSection() {
-    const section = document.getElementById("section2");
-    section.style.display = "block";
-
-    const grid = document.getElementById("subjectGrid");
-    grid.innerHTML = "";
-    MOCK.subjects.forEach((s) => {
-      const totalQ = MOCK.questions.filter((q) => q.subject_id === s.id).length;
-      const icon = s.name === "Science" ? "🔬" : s.name === "Mathematics" ? "📐" : "📚";
-      const btn = document.createElement("button");
-      btn.className = "subject-card";
-      btn.dataset.subject = s.id;
-      btn.onclick = () => selectSubject(s.id);
-      btn.innerHTML = `
-        <div class="subject-icon">${icon}</div>
-        <div class="subject-name">${s.name}</div>
-        <div class="subject-meta">${totalQ} questions</div>
-      `;
-      grid.appendChild(btn);
-    });
-  }
-
-  function selectSubject(subjectId) {
-    state.subjectId = subjectId;
-    document.querySelectorAll(".subject-card").forEach((c) => {
-      c.classList.toggle("selected", parseInt(c.dataset.subject) === subjectId);
-    });
-    updateStepper(3);
-    showDetailsSection();
-    updateFooter();
-  }
-
-  function showDetailsSection() {
-    const section = document.getElementById("section3");
-    section.style.display = "block";
-
-    // Chapter block — only for chapter test
-    if (state.examType === "chapter") {
-      document.getElementById("chapterBlock").style.display = "block";
-      renderChapterList();
-    } else {
-      document.getElementById("chapterBlock").style.display = "none";
-    }
-
-    // Count block — ALWAYS show (fix)
-    document.getElementById("countBlock").style.display = "block";
-  }
-
-  window.toggleChapterList = function () {
-    const list = document.getElementById("chapterList");
-    const trigger = document.getElementById("chapterTrigger");
-    const isOpen = list.classList.contains("open");
-    list.classList.toggle("open", !isOpen);
-    trigger.classList.toggle("open", !isOpen);
-  };
-
-  function renderChapterList() {
-    const list = document.getElementById("chapterList");
-    const subject = MOCK.subjects.find((s) => s.id === state.subjectId);
-    if (!subject) return;
-
-    list.innerHTML = "";
-    subject.sections.forEach((sec) => {
-      const label = document.createElement("div");
-      label.className = "chapter-group-label";
-      label.textContent = sec.name;
-      list.appendChild(label);
-
-      sec.chapters.forEach((c) => {
-        const qCount = MOCK.questions.filter((q) => q.chapter_id === c.id).length;
-        const item = document.createElement("button");
-        item.className = "chapter-item";
-        item.dataset.chapter = c.id;
-        if (qCount === 0) item.disabled = true;
-        item.onclick = () => selectChapter(c.id, c.name, qCount);
-        item.innerHTML = `
-          <span>${c.name}</span>
-          <span class="chapter-item-count">${qCount}Q</span>
-        `;
-        list.appendChild(item);
+  try {
+    const fullSubject = await PublicAPI.getSubject(subjectId);
+    state.sections = fullSubject.sections || [];
+    state.chapters = [];
+    state.sections.forEach((sec) => {
+      (sec.chapters || []).forEach((ch) => {
+        state.chapters.push({ ...ch, sectionName: sec.name });
       });
     });
+  } catch (error) {
+    console.error(error);
+    showToast("Failed to load chapters", "error");
+    return;
   }
 
-  function selectChapter(chapterId, chapterName, qCount) {
-    if (qCount === 0) return;
-    state.chapterId = chapterId;
+  updateStepper(3);
+  showDetailsSection();
+  updateFooter();
+}
 
-    const trigger = document.getElementById("chapterTrigger");
-    document.getElementById("chapterTriggerText").textContent = chapterName;
-    trigger.classList.remove("placeholder");
+// ============================================================
+// DETAILS
+// ============================================================
 
-    document.querySelectorAll(".chapter-item").forEach((c) => {
-      c.classList.toggle("selected", parseInt(c.dataset.chapter) === chapterId);
-    });
+function showDetailsSection() {
+  document.getElementById("section3").style.display = "block";
 
-    window.toggleChapterList();
-    updateFooter();
+  if (state.examType === "chapter") {
+    document.getElementById("chapterBlock").style.display = "block";
+    renderChapterSelector();
+  } else {
+    document.getElementById("chapterBlock").style.display = "none";
+  }
+}
+
+function renderChapterSelector() {
+  const wrapper = document.getElementById("chapterSelectWrapper");
+
+  if (state.chapters.length === 0) {
+    wrapper.innerHTML = `
+      <div class="admin-empty">
+        <div class="admin-empty-icon">📄</div>
+        <div class="admin-empty-title">No chapters</div>
+        <div class="admin-empty-text">No chapters in this subject yet</div>
+      </div>`;
+    return;
   }
 
-  document.addEventListener("click", (e) => {
-    const selector = document.getElementById("chapterSelector");
-    const list = document.getElementById("chapterList");
-    if (selector && list && list.classList.contains("open") && !selector.contains(e.target)) {
-      list.classList.remove("open");
-      document.getElementById("chapterTrigger").classList.remove("open");
-    }
+  const grouped = {};
+  state.chapters.forEach((ch) => {
+    if (!grouped[ch.sectionName]) grouped[ch.sectionName] = [];
+    grouped[ch.sectionName].push(ch);
   });
 
-  window.selectDifficulty = function (btn) {
-    document.querySelectorAll("#difficultyChips .chip").forEach((c) => c.classList.remove("active"));
-    btn.classList.add("active");
-    state.difficulty = btn.dataset.diff;
-    updateFooter();
-  };
+  wrapper.innerHTML = `
+    <div style="background:var(--color-card);border:1.5px solid var(--color-border);border-radius:var(--radius-md);max-height:320px;overflow-y:auto;padding:6px">
+      ${Object.entries(grouped).map(([sectionName, chapters]) => `
+        <div style="padding:8px 10px 4px;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:0.08em;color:var(--color-text-muted)">${escapeHtml(sectionName)}</div>
+        ${chapters.map((ch) => `
+          <label style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:8px;cursor:pointer">
+            <input type="checkbox" data-chapter-id="${ch.id}" onchange="toggleChapter(${ch.id}, this.checked)" style="width:18px;height:18px;accent-color:var(--color-primary);cursor:pointer;flex-shrink:0" />
+            <span style="flex:1;font-size:14px;font-weight:600;color:var(--color-text)">${escapeHtml(ch.name)}</span>
+          </label>
+        `).join("")}
+      `).join("")}
+    </div>
+    <div style="font-size:12px;color:var(--color-text-muted);margin-top:6px;font-weight:500">
+      Select one or more chapters
+    </div>
+  `;
+}
 
-  window.selectCount = function (btn) {
-    document.querySelectorAll("#countChips .chip").forEach((c) => c.classList.remove("active"));
-    btn.classList.add("active");
-    state.count = parseInt(btn.dataset.count);
-    updateFooter();
-  };
+function toggleChapter(chapterId, checked) {
+  if (checked) {
+    if (!state.chapterIds.includes(chapterId)) state.chapterIds.push(chapterId);
+  } else {
+    state.chapterIds = state.chapterIds.filter((id) => id !== chapterId);
+  }
+  updateFooter();
+}
 
-  function updateFooter() {
-    const footer = document.getElementById("footerCta");
-    if (!state.examType) {
-      footer.style.display = "none";
-      return;
-    }
-    footer.style.display = "flex";
-    const duration = state.count;
-    document.getElementById("footerInfo").textContent =
-      `${state.count} Q • ${duration} min • ${capitalize(state.difficulty)}`;
+// ============================================================
+// DIFFICULTY & COUNT
+// ============================================================
+
+window.selectDifficulty = function (btn) {
+  document.querySelectorAll("#difficultyChips .chip").forEach((c) => c.classList.remove("active"));
+  btn.classList.add("active");
+  state.difficulty = btn.dataset.diff;
+  updateFooter();
+};
+
+window.selectCount = function (btn) {
+  document.querySelectorAll("#countChips .chip").forEach((c) => c.classList.remove("active"));
+  btn.classList.add("active");
+  state.count = parseInt(btn.dataset.count);
+  updateFooter();
+};
+
+// ============================================================
+// STEPPER
+// ============================================================
+
+function updateStepper(step) {
+  document.querySelectorAll(".step").forEach((s) => {
+    const num = parseInt(s.dataset.step);
+    s.classList.remove("active", "done");
+    if (num === step) s.classList.add("active");
+    else if (num < step) s.classList.add("done");
+  });
+  document.querySelectorAll(".step-line").forEach((line, i) => {
+    line.classList.toggle("done", i < step - 1);
+  });
+}
+
+// ============================================================
+// FOOTER
+// ============================================================
+
+function updateFooter() {
+  const footer = document.getElementById("footerCta");
+  if (!state.examType) { footer.style.display = "none"; return; }
+  footer.style.display = "flex";
+  const duration = state.count;
+  document.getElementById("footerInfo").textContent =
+    `${state.count} Q • ${duration} min • ${capitalize(state.difficulty)}`;
+}
+
+function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+function highlightSection(sectionId) {
+  const section = document.getElementById(sectionId);
+  if (!section) return;
+  section.scrollIntoView({ behavior: "smooth", block: "center" });
+  section.classList.add("section-highlight");
+  setTimeout(() => section.classList.remove("section-highlight"), 1600);
+}
+
+// ============================================================
+// BEGIN EXAM
+// ============================================================
+
+window.beginExam = async function () {
+  if (!state.examType) { highlightSection("section1"); showToast("Select exam type", "error"); return; }
+  if (!state.subjectId) { highlightSection("section2"); showToast("Select a subject", "error"); return; }
+  if (state.examType === "chapter" && state.chapterIds.length === 0) {
+    highlightSection("chapterBlock"); showToast("Select at least one chapter", "error"); return;
   }
 
-  function capitalize(s) {
-    return s.charAt(0).toUpperCase() + s.slice(1);
-  }
-
-  function highlightSection(sectionId) {
-    const section = document.getElementById(sectionId);
-    if (!section) return;
-    section.scrollIntoView({ behavior: "smooth", block: "center" });
-    section.classList.add("section-highlight");
-    setTimeout(() => section.classList.remove("section-highlight"), 1600);
-  }
-
-  window.beginExam = function () {
-    if (!state.examType) {
-      highlightSection("section1");
-      return;
-    }
-    if ((state.examType === "full" || state.examType === "chapter") && !state.subjectId) {
-      highlightSection("section2");
-      return;
-    }
-    if (state.examType === "chapter" && !state.chapterId) {
-      highlightSection("chapterBlock");
-      return;
-    }
-
-    const params = new URLSearchParams({
-      type: state.examType,
-      subject: state.subjectId || 1,
-      difficulty: state.difficulty,
-      count: state.count,
-      duration: state.count,
-    });
-    if (state.chapterId) params.set("chapter", state.chapterId);
-
-    window.location.href = `exam.html?${params.toString()}`;
+  const payload = {
+    exam_type: state.examType,
+    subject_id: state.subjectId,
+    chapter_ids: state.examType === "chapter" ? state.chapterIds : null,
+    difficulty: state.difficulty,
+    count: state.count,
+    duration_minutes: state.count,
   };
 
-  updateStepper(1);
-})();
+  const btn = document.querySelector("#footerCta button");
+  if (btn) { btn.disabled = true; btn.textContent = "Starting..."; }
+
+  try {
+    const response = await ExamAPI.start(payload);
+    localStorage.setItem("currentTestId", response.test_id);
+    localStorage.setItem("currentTestData", JSON.stringify(response));
+    window.location.href = "exam.html";
+  } catch (error) {
+    console.error("Begin exam error:", error);
+    showToast(error.message || "Failed to start exam", "error");
+    if (btn) { btn.disabled = false; btn.textContent = "Begin →"; }
+  }
+};
+
+window.selectDifficulty = window.selectDifficulty;
+window.selectCount = window.selectCount;
+window.toggleChapter = toggleChapter;
+window.beginExam = window.beginExam;
