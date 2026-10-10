@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM START — 5 Exam Types + Cache + Retry
+// EXAM START — 5 Exam Types + Cache + Retry + Card Reset Fix
 // ============================================================
 
 let state = {
@@ -165,11 +165,28 @@ async function selectSubject(subjectId, clickedCard) {
     state.sections = sections;
     state.chapters = chapters;
 
+    // Reset card text
+    if (clickedCard) {
+      clickedCard.style.pointerEvents = "auto";
+      const meta = clickedCard.querySelector(".subject-meta");
+      const subject = state.subjects.find((s) => s.id === subjectId);
+      if (meta && subject) meta.textContent = subject.code;
+    }
+
     showDetailsSection();
     updateFooter();
   } catch (error) {
     console.error(error);
     showToast("Failed to load chapters", "error");
+
+    // Reset card on error
+    if (clickedCard) {
+      clickedCard.style.pointerEvents = "auto";
+      const meta = clickedCard.querySelector(".subject-meta");
+      const subject = state.subjects.find((s) => s.id === subjectId);
+      if (meta && subject) meta.textContent = subject.code;
+    }
+
     document.getElementById("section3").innerHTML = `
       <div class="admin-empty">
         <div class="admin-empty-icon">❌</div>
@@ -348,9 +365,8 @@ window.beginExam = async function () {
 
   async function attemptStart() {
     try {
-      // Extended timeout for Render cold start
       const controller = new AbortController();
-      const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 sec
+      const timeoutId = setTimeout(() => controller.abort(), 45000);
 
       const response = await fetch(`${CONFIG.API_URL}/api/exam/start`, {
         method: "POST",
@@ -375,7 +391,6 @@ window.beginExam = async function () {
 
       const data = await response.json();
 
-      // Success!
       localStorage.setItem("currentTestId", data.test_id);
       localStorage.setItem("currentTestData", JSON.stringify(data));
       window.location.href = "exam.html";
@@ -384,7 +399,6 @@ window.beginExam = async function () {
     } catch (error) {
       console.error("Begin exam error:", error);
 
-      // Retry on network/timeout errors
       const isRetryable = error.name === "AbortError" || 
                           error.message.includes("Network") || 
                           error.message.includes("fetch") ||
@@ -395,12 +409,10 @@ window.beginExam = async function () {
         console.log(`Retrying... attempt ${retries}`);
         showToast(`Backend waking up... retry ${retries}/${maxRetries}`, "info", 2000);
 
-        // Wait 3 seconds before retry
         await new Promise((r) => setTimeout(r, 3000));
         return attemptStart();
       }
 
-      // Final failure
       showToast(error.message || "Failed to start exam", "error", 4000);
       if (btn) {
         btn.disabled = false;
