@@ -36,19 +36,19 @@
     </header>
 
     <main class="app-main">
-      <!-- Start Exam -->
+      <!-- Start Exam — INDIGO (Unique top) -->
       <section class="section">
         <button class="action-box action-box-primary action-box-large" onclick="startExam()">
           <div class="box-icon">🎯</div>
           <div class="box-content">
             <div class="box-title-large">Start Exam</div>
-            <div class="box-sub-large">45 Q • 60 min • Mixed difficulty</div>
+            <div class="box-sub-large">Full • Chapter • AI • HOTS</div>
           </div>
           <div class="box-arrow">→</div>
         </button>
       </section>
 
-      <!-- Analyse -->
+      <!-- Analyse — TEAL -->
       <section class="section">
         <button class="action-box action-box-teal action-box-medium" onclick="goTo('analyse.html')">
           <div class="box-icon">📊</div>
@@ -68,7 +68,7 @@
             <div class="box-title">Mistakes</div>
             <div class="box-sub">Review & redo</div>
           </button>
-          <button class="action-box action-box-amber" onclick="goTo('exams.html')">
+          <button class="action-box action-box-amber" onclick="goTo('practice.html')">
             <div class="box-icon">🎯</div>
             <div class="box-title">Weak Areas</div>
             <div class="box-sub">Targeted practice</div>
@@ -115,16 +115,15 @@
     </nav>
   </div>
 
-  <!-- Toast + Modal containers -->
   <div id="toastContainer" class="toast-container"></div>
   <div id="modalRoot"></div>
 
-  <!-- Scripts (in order) -->
   <script src="js/config.js"></script>
   <script src="js/api.js"></script>
   <script src="js/toast.js"></script>
   <script src="js/modal.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/dashboard.js"></script>
+  <script src="js/notification.js"></script>
 </body>
 </html>
