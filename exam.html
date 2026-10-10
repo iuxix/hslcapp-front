@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Exam — SEBA HSLC</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/exam.css" />
+</head>
+<body>
+  <div class="exam-shell">
+    <!-- HEADER -->
+    <header class="exam-header">
+      <button class="exam-pause-btn" onclick="confirmExit()">
+        <span class="pause-icon">⏸</span>
+        <span class="pause-text">Pause</span>
+      </button>
+
+      <div class="exam-header-center">
+        <div class="exam-title" id="examTitle">Full MCQ Test</div>
+        <small id="examSubtitle">Science • 30 Q • 60 min</small>
+      </div>
+
+      <div class="timer" id="timer">60:00</div>
+    </header>
+
+    <div class="exam-layout">
+      <main class="exam-body">
+        <div class="question-card">
+          <div class="question-header">
+            <div class="question-number" id="qNumber">Question 1 of 30</div>
+            <div class="question-meta">
+              <span class="badge badge-muted" id="qDifficulty">Easy</span>
+              <span class="badge badge-muted" id="qChapter">Electricity</span>
+            </div>
+          </div>
+
+          <div class="question-text" id="qText">Loading...</div>
+          <div class="options-list" id="optionsList"></div>
+        </div>
+
+        <div class="exam-actions">
+          <button class="btn btn-outline" id="prevBtn" onclick="prevQuestion()">← Prev</button>
+          <button class="btn btn-ghost" id="markBtn" onclick="toggleMark()">🔖 Mark</button>
+          <button class="btn btn-outline" id="clearBtn" onclick="clearAnswer()">Clear</button>
+          <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Next →</button>
+        </div>
+      </main>
+    </div>
+
+    <!-- FLOATING PALETTE BUTTON — Left side, above footer -->
+    <button class="palette-toggle" onclick="togglePalette()" aria-label="Question palette">
+      <span class="palette-icon">☰</span>
+    </button>
+
+    <!-- PALETTE SHEET -->
+    <aside class="palette-sheet" id="paletteSheet">
+      <div class="palette-sheet-handle"></div>
+      <div class="palette-sheet-header">
+        <h3>Question Palette</h3>
+        <button class="palette-close" onclick="togglePalette()">✕</button>
+      </div>
+      <div class="palette-legend">
+        <span class="legend-item"><span class="legend-dot answered"></span>Answered</span>
+        <span class="legend-item"><span class="legend-dot not-answered"></span>Not answered</span>
+        <span class="legend-item"><span class="legend-dot marked"></span>Marked</span>
+        <span class="legend-item"><span class="legend-dot not-visited"></span>Not visited</span>
+      </div>
+      <div class="palette-grid" id="paletteGrid"></div>
+    </aside>
+
+    <!-- FOOTER -->
+    <footer class="exam-footer">
+      <button class="btn btn-primary btn-block" onclick="confirmSubmit()">Submit Test</button>
+    </footer>
+  </div>
+
+  <!-- Custom modal container -->
+  <div id="modalRoot"></div>
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/exam.js"></script>
+</body>
+</html>

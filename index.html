@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Login — SEBA HSLC</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/auth.css" />
+</head>
+<body class="auth-body">
+  <div class="auth-shell">
+    <div class="auth-brand">
+      <div class="brand-logo">🎓</div>
+      <h1 class="brand-name">SEBA HSLC</h1>
+      <p class="brand-tag">Class 10 Study Platform</p>
+    </div>
+
+    <div class="auth-card">
+      <div class="auth-card-header">
+        <h2>Welcome back</h2>
+        <p>Login to continue your practice</p>
+      </div>
+
+      <form id="studentLoginForm" class="auth-form" autocomplete="on">
+        <div class="input-group">
+          <label for="username">Username</label>
+          <div class="input-wrap">
+            <span class="input-icon">👤</span>
+            <input
+              type="text"
+              id="username"
+              name="username"
+              placeholder="Enter your username"
+              autocomplete="username"
+              required
+            />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label for="password">Password</label>
+          <div class="input-wrap">
+            <span class="input-icon">🔒</span>
+            <input
+              type="password"
+              id="password"
+              name="password"
+              placeholder="Enter your password"
+              autocomplete="current-password"
+              required
+            />
+            <button
+              type="button"
+              class="toggle-password"
+              onclick="togglePassword()"
+              aria-label="Toggle password"
+            >👁️</button>
+          </div>
+        </div>
+
+        <div id="loginError" class="form-error" hidden></div>
+
+        <button type="submit" class="btn btn-primary btn-block btn-lg">
+          Login →
+        </button>
+      </form>
+
+      <div class="auth-footer">
+        <p>Need an account? <strong>Contact admin</strong></p>
+      </div>
+    </div>
+
+    <p class="admin-link">
+      <a href="admin/login.html">Admin login →</a>
+    </p>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

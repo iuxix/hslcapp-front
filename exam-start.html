@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Start Exam — SEBA HSLC</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/exam-start.css" />
+</head>
+<body>
+  <div class="exam-start-shell">
+    <header class="exam-start-header">
+      <button class="back-btn" onclick="window.location.href='dashboard.html'">
+        <span>←</span>
+      </button>
+      <div class="header-title">
+        <h2>Start Exam</h2>
+        <p>Choose what you want to practice</p>
+      </div>
+    </header>
+
+    <div class="stepper">
+      <div class="step active" data-step="1">
+        <span class="step-num">1</span>
+        <span class="step-label">Type</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="2">
+        <span class="step-num">2</span>
+        <span class="step-label">Subject</span>
+      </div>
+      <div class="step-line"></div>
+      <div class="step" data-step="3">
+        <span class="step-num">3</span>
+        <span class="step-label">Details</span>
+      </div>
+    </div>
+
+    <main class="exam-start-main">
+      <section class="exam-section" id="section1">
+        <div class="section-label">Choose exam type</div>
+        <div class="exam-type-grid" id="examTypeGrid"></div>
+      </section>
+
+      <section class="exam-section" id="section2" style="display:none">
+        <div class="section-label">Choose subject</div>
+        <div class="subject-grid" id="subjectGrid"></div>
+      </section>
+
+      <section class="exam-section" id="section3" style="display:none">
+        <div id="chapterBlock" style="display:none">
+          <div class="section-label">Choose chapter</div>
+          <div class="chapter-selector" id="chapterSelector">
+            <button class="chapter-trigger placeholder" id="chapterTrigger" onclick="toggleChapterList()">
+              <span id="chapterTriggerText">Select a chapter</span>
+              <span class="chapter-arrow">▾</span>
+            </button>
+            <div class="chapter-list" id="chapterList"></div>
+          </div>
+        </div>
+
+        <div class="subsection">
+          <div class="section-label">Difficulty</div>
+          <div class="chip-row" id="difficultyChips">
+            <button class="chip active" data-diff="mixed" onclick="selectDifficulty(this)">Mixed</button>
+            <button class="chip" data-diff="easy" onclick="selectDifficulty(this)">Easy</button>
+            <button class="chip" data-diff="hard" onclick="selectDifficulty(this)">Hard</button>
+          </div>
+        </div>
+
+        <div class="subsection" id="countBlock">
+          <div class="section-label">Number of questions</div>
+          <div class="chip-row" id="countChips">
+            <button class="chip" data-count="5" onclick="selectCount(this)">5</button>
+            <button class="chip" data-count="10" onclick="selectCount(this)">10</button>
+            <button class="chip" data-count="20" onclick="selectCount(this)">20</button>
+            <button class="chip active" data-count="45" onclick="selectCount(this)">45</button>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <footer class="exam-start-footer" id="footerCta" style="display:none">
+      <div class="footer-info">
+        <div class="footer-info-label">Ready to start</div>
+        <div class="footer-info-value" id="footerInfo">45 Q • 45 min • Mixed</div>
+      </div>
+      <button class="btn btn-primary" onclick="beginExam()">Begin →</button>
+    </footer>
+  </div>
+
+  <script src="js/mock-data.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/exam-start.js"></script>
+</body>
+</html>

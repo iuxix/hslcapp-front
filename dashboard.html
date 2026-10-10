@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard — SEBA HSLC</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="app-header">
+      <div class="header-top">
+        <div class="header-greeting">
+          <h2 id="greetingName">Hi, Student 👋</h2>
+          <p>Class 10 • SEBA HSLC</p>
+        </div>
+        <div class="header-avatar" id="userAvatar" onclick="goTo('profile.html')">S</div>
+      </div>
+
+      <div class="header-stats">
+        <div class="header-stat">
+          <div class="stat-value" id="statTests">0</div>
+          <div class="stat-label">Tests</div>
+        </div>
+        <div class="header-stat">
+          <div class="stat-value" id="statAccuracy">--</div>
+          <div class="stat-label">Accuracy</div>
+        </div>
+        <div class="header-stat">
+          <div class="stat-value" id="statAvg">--</div>
+          <div class="stat-label">Avg Time</div>
+        </div>
+      </div>
+    </header>
+
+    <main class="app-main">
+      <!-- Start Exam -->
+      <section class="section">
+        <button class="action-box action-box-primary action-box-large" onclick="startExam()">
+          <div class="box-icon">🎯</div>
+          <div class="box-content">
+            <div class="box-title-large">Start Exam</div>
+            <div class="box-sub-large">45 Q • 60 min • Mixed difficulty</div>
+          </div>
+          <div class="box-arrow">→</div>
+        </button>
+      </section>
+
+      <!-- Analyse -->
+      <section class="section">
+        <button class="action-box action-box-teal action-box-medium" onclick="goTo('analyse.html')">
+          <div class="box-icon">📊</div>
+          <div class="box-content">
+            <div class="box-title">Analyse</div>
+            <div class="box-sub">Progress, stats, weak topics</div>
+          </div>
+          <div class="box-arrow">→</div>
+        </button>
+      </section>
+
+      <!-- Mistakes + Weak Areas -->
+      <section class="section">
+        <div class="box-grid-2">
+          <button class="action-box action-box-rose" onclick="goTo('mistakes.html')">
+            <div class="box-icon">❌</div>
+            <div class="box-title">Mistakes</div>
+            <div class="box-sub">Review & redo</div>
+          </button>
+          <button class="action-box action-box-amber" onclick="goTo('exams.html')">
+            <div class="box-icon">🎯</div>
+            <div class="box-title">Weak Areas</div>
+            <div class="box-sub">Targeted practice</div>
+          </button>
+        </div>
+      </section>
+
+      <!-- History -->
+      <section class="section">
+        <h3 class="section-title">📜 Recent History</h3>
+        <div id="recentTests"></div>
+        <button class="btn btn-ghost btn-block" style="margin-top:12px" onclick="goTo('history.html')">
+          See all history →
+        </button>
+      </section>
+
+      <!-- Weak Chapters -->
+      <section class="section">
+        <h3 class="section-title">🎯 Weak Chapters</h3>
+        <div id="weakChapters"></div>
+      </section>
+    </main>
+
+    <nav class="bottom-nav">
+      <a class="nav-item active" href="dashboard.html">
+        <span class="nav-icon">🏠</span>
+        <span class="nav-label">Home</span>
+      </a>
+      <a class="nav-item" href="exams.html">
+        <span class="nav-icon">📝</span>
+        <span class="nav-label">Exams</span>
+      </a>
+      <button class="fab" onclick="startExam()" aria-label="Start">
+        <span class="fab-icon">+</span>
+      </button>
+      <a class="nav-item" href="analyse.html">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Analyse</span>
+      </a>
+      <a class="nav-item" href="profile.html">
+        <span class="nav-icon">👤</span>
+        <span class="nav-label">Profile</span>
+      </a>
+    </nav>
+  </div>
+
+  <!-- Toast + Modal containers -->
+  <div id="toastContainer" class="toast-container"></div>
+  <div id="modalRoot"></div>
+
+  <!-- Scripts (in order) -->
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/dashboard.js"></script>
+</body>
+</html>
