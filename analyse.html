@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Analyse — SEBA HSLC</title>
+  <link rel="stylesheet" href="css/base.css" />
+  <link rel="stylesheet" href="css/components.css" />
+  <link rel="stylesheet" href="css/dashboard.css" />
+  <link rel="stylesheet" href="css/pages.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="page-simple-header">
+      <button class="back-btn" onclick="window.location.href='dashboard.html'">←</button>
+      <h2>Analyse</h2>
+    </header>
+
+    <main class="app-main" id="analyseMain">
+      <div class="admin-loading">
+        <div class="admin-spinner"></div>
+        <div class="admin-loading-text">Loading analysis...</div>
+      </div>
+    </main>
+  </div>
+
+  <div id="toastContainer" class="toast-container"></div>
+  <div id="modalRoot"></div>
+
+  <script src="js/config.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/modal.js"></script>
+  <script src="js/auth.js"></script>
+  <script src="js/analyse.js"></script>
+</body>
+</html>
