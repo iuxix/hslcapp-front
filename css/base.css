@@ -1,0 +1,337 @@
+:root {
+  /* PRIMARY — Indigo */
+  --color-primary:        #6366F1;
+  --color-primary-dark:   #4F46E5;
+  --color-primary-light:  #818CF8;
+  --color-primary-bg:     #EEF2FF;
+  --color-primary-soft:   #E0E7FF;
+
+  /* ACCENT — Teal */
+  --color-accent:         #14B8A6;
+  --color-accent-dark:    #0D9488;
+  --color-accent-bg:      #CCFBF1;
+
+  /* STATUS */
+  --color-success:        #10B981;
+  --color-success-bg:     #D1FAE5;
+  --color-warning:        #F59E0B;
+  --color-warning-bg:     #FEF3C7;
+  --color-danger:         #F43F5E;
+  --color-danger-bg:      #FFE4E6;
+  --color-info:           #0EA5E9;
+
+  /* ACCENT COLORS */
+  --accent-indigo:        #6366F1;
+  --accent-indigo-bg:     #EEF2FF;
+  --accent-rose:          #F43F5E;
+  --accent-rose-bg:       #FFE4E6;
+  --accent-teal:          #14B8A6;
+  --accent-teal-bg:       #CCFBF1;
+  --accent-purple:        #8B5CF6;
+  --accent-purple-bg:     #F3E8FF;
+
+  /* BACKGROUNDS */
+  --color-bg:             #F5F7FB;
+  --color-bg-alt:         #EEF2F7;
+  --color-card:           #FFFFFF;
+  --color-border:         #E8ECF2;
+  --color-border-strong:  #D1D9E6;
+
+  /* TEXT */
+  --color-text:           #0F172A;
+  --color-text-muted:     #6B7280;
+  --color-text-light:     #9CA3AF;
+
+  /* ADMIN */
+  --color-admin:          #7C2D12;
+  --color-admin-dark:     #5A1F0A;
+  --color-admin-bg:       #FFF7ED;
+
+  /* SPACING */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+
+  /* RADIUS */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 999px;
+
+  /* SHADOWS */
+  --shadow-xs:  0 1px 2px rgba(15, 23, 42, 0.04);
+  --shadow-sm:  0 2px 8px rgba(15, 23, 42, 0.05);
+  --shadow-md:  0 6px 20px rgba(15, 23, 42, 0.07);
+  --shadow-lg:  0 12px 32px rgba(15, 23, 42, 0.10);
+  --shadow-xl:  0 20px 48px rgba(15, 23, 42, 0.14);
+
+  /* TYPOGRAPHY */
+  --font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'SF Mono', Monaco, 'Cascadia Code', monospace;
+
+  /* TRANSITIONS */
+  --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-base: 200ms cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-slow: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ============================================================
+   RESET
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: var(--font-family);
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  letter-spacing: -0.01em;
+  -webkit-overflow-scrolling: touch;
+  animation: pageLoad 300ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes pageLoad {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ============================================================
+   LINKS & BUTTONS
+   ============================================================ */
+
+a {
+  color: var(--color-primary);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+
+a:hover {
+  color: var(--color-primary-dark);
+}
+
+button {
+  font-family: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+input, textarea, select {
+  font-family: inherit;
+  font-size: 15px;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+}
+
+/* ============================================================
+   HEADINGS
+   ============================================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.25;
+  letter-spacing: -0.02em;
+}
+
+h1 { font-size: 26px; }
+h2 { font-size: 21px; }
+h3 { font-size: 17px; }
+h4 { font-size: 15px; }
+
+/* ============================================================
+   SELECTION & SCROLLBAR
+   ============================================================ */
+
+::selection {
+  background: var(--color-primary);
+  color: white;
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-border-strong);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-light);
+}
+
+/* ============================================================
+   PERFORMANCE
+   ============================================================ */
+
+button, a, .action-box, .compact-action, .hero-action, .nav-item, .fab, .admin-btn, .admin-btn-icon, .custom-select-option, .admin-sheet-option {
+  touch-action: manipulation;
+  transition-timing-function: cubic-bezier(0.16, 1, 0.3, 1) !important;
+}
+
+img {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Remove heavy blur on mobile */
+@media (max-width: 768px) {
+  * {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+  }
+}
+
+/* ============================================================
+   SMOOTH CARD ANIMATIONS
+   ============================================================ */
+
+.info-card,
+.admin-user-card,
+.admin-subject-card,
+.admin-question-card,
+.history-item,
+.action-box {
+  animation: cardAppear 400ms cubic-bezier(0.16, 1, 0.3, 1) backwards;
+}
+
+@keyframes cardAppear {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.99);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Stagger delays — User cards */
+.admin-user-card:nth-child(1) { animation-delay: 0ms; }
+.admin-user-card:nth-child(2) { animation-delay: 30ms; }
+.admin-user-card:nth-child(3) { animation-delay: 60ms; }
+.admin-user-card:nth-child(4) { animation-delay: 90ms; }
+.admin-user-card:nth-child(5) { animation-delay: 120ms; }
+.admin-user-card:nth-child(6) { animation-delay: 150ms; }
+.admin-user-card:nth-child(7) { animation-delay: 180ms; }
+.admin-user-card:nth-child(8) { animation-delay: 210ms; }
+
+/* Stagger delays — Subject cards */
+.admin-subject-card:nth-child(1) { animation-delay: 0ms; }
+.admin-subject-card:nth-child(2) { animation-delay: 40ms; }
+.admin-subject-card:nth-child(3) { animation-delay: 80ms; }
+.admin-subject-card:nth-child(4) { animation-delay: 120ms; }
+.admin-subject-card:nth-child(5) { animation-delay: 160ms; }
+.admin-subject-card:nth-child(6) { animation-delay: 200ms; }
+
+/* Stagger delays — Question cards */
+.admin-question-card:nth-child(1) { animation-delay: 0ms; }
+.admin-question-card:nth-child(2) { animation-delay: 30ms; }
+.admin-question-card:nth-child(3) { animation-delay: 60ms; }
+.admin-question-card:nth-child(4) { animation-delay: 90ms; }
+.admin-question-card:nth-child(5) { animation-delay: 120ms; }
+.admin-question-card:nth-child(6) { animation-delay: 150ms; }
+
+/* Stagger delays — Info cards */
+.info-card:nth-child(1) { animation-delay: 0ms; }
+.info-card:nth-child(2) { animation-delay: 30ms; }
+.info-card:nth-child(3) { animation-delay: 60ms; }
+.info-card:nth-child(4) { animation-delay: 90ms; }
+.info-card:nth-child(5) { animation-delay: 120ms; }
+
+/* Stagger delays — History items */
+.history-item:nth-child(1) { animation-delay: 0ms; }
+.history-item:nth-child(2) { animation-delay: 40ms; }
+.history-item:nth-child(3) { animation-delay: 80ms; }
+.history-item:nth-child(4) { animation-delay: 120ms; }
+.history-item:nth-child(5) { animation-delay: 160ms; }
+
+/* ============================================================
+   SMOOTH DETAILS/SUMMARY
+   ============================================================ */
+
+details {
+  transition: all 200ms ease;
+}
+
+details > summary {
+  cursor: pointer;
+  list-style: none;
+  transition: color 150ms ease;
+}
+
+details > summary::-webkit-details-marker {
+  display: none;
+}
+
+/* ============================================================
+   MODAL & DROPDOWN SMOOTHNESS
+   ============================================================ */
+
+.modal-backdrop,
+.modal,
+.custom-select-list,
+.sheet-backdrop,
+.sheet {
+  will-change: transform, opacity;
+}
+
+/* ============================================================
+   FOCUS STATES
+   ============================================================ */
+
+button:focus-visible,
+input:focus-visible,
+.custom-select-trigger:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* ============================================================
+   REDUCED MOTION
+   ============================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
