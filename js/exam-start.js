@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM START — 5 Exam Types (No duplicates)
+// EXAM START — 5 Exam Types + Loading
 // ============================================================
 
 let state = {
@@ -271,7 +271,7 @@ function highlightSection(sectionId) {
 }
 
 // ============================================================
-// BEGIN EXAM
+// BEGIN EXAM — with Loading
 // ============================================================
 
 window.beginExam = async function () {
@@ -290,6 +290,10 @@ window.beginExam = async function () {
     duration_minutes: state.count,
   };
 
+  // Show loading overlay
+  const overlay = document.getElementById("loadingOverlay");
+  if (overlay) overlay.style.display = "flex";
+
   const btn = document.querySelector("#footerCta button");
   if (btn) { btn.disabled = true; btn.textContent = "Starting..."; }
 
@@ -297,9 +301,12 @@ window.beginExam = async function () {
     const response = await ExamAPI.start(payload);
     localStorage.setItem("currentTestId", response.test_id);
     localStorage.setItem("currentTestData", JSON.stringify(response));
+
+    // Instant redirect
     window.location.href = "exam.html";
   } catch (error) {
     console.error("Begin exam error:", error);
+    if (overlay) overlay.style.display = "none";
     showToast(error.message || "Failed to start exam", "error");
     if (btn) { btn.disabled = false; btn.textContent = "Begin →"; }
   }
