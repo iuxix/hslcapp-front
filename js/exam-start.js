@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM START — 5 Exam Types + Cache (No loading screens)
+// EXAM START — 5 Exam Types + Cache + Retry
 // ============================================================
 
 let state = {
@@ -318,7 +318,7 @@ function highlightSection(sectionId) {
 }
 
 // ============================================================
-// BEGIN EXAM — No Loading Overlay, Just Redirect
+// BEGIN EXAM — with Retry Logic
 // ============================================================
 
 window.beginExam = async function () {
@@ -338,18 +338,78 @@ window.beginExam = async function () {
   };
 
   const btn = document.querySelector("#footerCta button");
-  if (btn) { btn.disabled = true; btn.textContent = "Starting..."; }
-
-  try {
-    const response = await ExamAPI.start(payload);
-    localStorage.setItem("currentTestId", response.test_id);
-    localStorage.setItem("currentTestData", JSON.stringify(response));
-    window.location.href = "exam.html";
-  } catch (error) {
-    console.error("Begin exam error:", error);
-    showToast(error.message || "Failed to start exam", "error");
-    if (btn) { btn.disabled = false; btn.textContent = "Begin →"; }
+  if (btn) {
+    btn.disabled = true;
+    btn.textContent = "Starting...";
   }
+
+  let retries = 0;
+  const maxRetries = 2;
+
+  async function attemptStart() {
+    try {
+      // Extended timeout for Render cold start
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 45000); // 45 sec
+
+      const response = await fetch(`${CONFIG.API_URL}/api/exam/start`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${API.getToken()}`,
+        },
+        body: JSON.stringify(payload),
+        signal: controller.signal,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        let errorMsg = `HTTP ${response.status}`;
+        try {
+          const errData = await response.json();
+          errorMsg = errData.detail || errorMsg;
+        } catch {}
+        throw new Error(errorMsg);
+      }
+
+      const data = await response.json();
+
+      // Success!
+      localStorage.setItem("currentTestId", data.test_id);
+      localStorage.setItem("currentTestData", JSON.stringify(data));
+      window.location.href = "exam.html";
+      return;
+
+    } catch (error) {
+      console.error("Begin exam error:", error);
+
+      // Retry on network/timeout errors
+      const isRetryable = error.name === "AbortError" || 
+                          error.message.includes("Network") || 
+                          error.message.includes("fetch") ||
+                          error.message.includes("Load failed");
+
+      if (isRetryable && retries < maxRetries) {
+        retries++;
+        console.log(`Retrying... attempt ${retries}`);
+        showToast(`Backend waking up... retry ${retries}/${maxRetries}`, "info", 2000);
+
+        // Wait 3 seconds before retry
+        await new Promise((r) => setTimeout(r, 3000));
+        return attemptStart();
+      }
+
+      // Final failure
+      showToast(error.message || "Failed to start exam", "error", 4000);
+      if (btn) {
+        btn.disabled = false;
+        btn.textContent = "Begin →";
+      }
+    }
+  }
+
+  await attemptStart();
 };
 
 window.selectDifficulty = window.selectDifficulty;
