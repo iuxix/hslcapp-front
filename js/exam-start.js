@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM START — 5 Exam Types + Loading
+// EXAM START — 5 Exam Types + Cache (No loading screens)
 // ============================================================
 
 let state = {
@@ -12,6 +12,9 @@ let state = {
   difficulty: "mixed",
   count: 30,
 };
+
+// Cache — already loaded subjects
+const subjectCache = {};
 
 (function () {
   if (!requireLogin()) return;
@@ -103,7 +106,7 @@ function showSubjectSection() {
     const btn = document.createElement("button");
     btn.className = "subject-card";
     btn.dataset.subject = s.id;
-    btn.onclick = () => selectSubject(s.id);
+    btn.onclick = () => selectSubject(s.id, btn);
     btn.innerHTML = `
       <div class="subject-icon">${icon}</div>
       <div class="subject-name">${escapeHtml(s.name)}</div>
@@ -118,7 +121,7 @@ function getSubjectIcon(code) {
   return icons[code] || "📚";
 }
 
-async function selectSubject(subjectId) {
+async function selectSubject(subjectId, clickedCard) {
   state.subjectId = subjectId;
   state.chapterIds = [];
 
@@ -126,29 +129,73 @@ async function selectSubject(subjectId) {
     c.classList.toggle("selected", parseInt(c.dataset.subject) === subjectId);
   });
 
-  try {
-    const fullSubject = await PublicAPI.getSubject(subjectId);
-    state.sections = fullSubject.sections || [];
-    state.chapters = [];
-    state.sections.forEach((sec) => {
-      (sec.chapters || []).forEach((ch) => {
-        state.chapters.push({ ...ch, sectionName: sec.name });
-      });
-    });
-  } catch (error) {
-    console.error(error);
-    showToast("Failed to load chapters", "error");
+  // If cached — instant go
+  if (subjectCache[subjectId]) {
+    state.sections = subjectCache[subjectId].sections;
+    state.chapters = subjectCache[subjectId].chapters;
+    updateStepper(3);
+    showDetailsSection();
+    updateFooter();
     return;
   }
 
+  // Show inline loading on card
+  if (clickedCard) {
+    clickedCard.style.pointerEvents = "none";
+    const meta = clickedCard.querySelector(".subject-meta");
+    if (meta) meta.textContent = "Loading...";
+  }
+
+  // Go to Step 3 immediately with skeleton
   updateStepper(3);
-  showDetailsSection();
+  showDetailsSectionSkeleton();
   updateFooter();
+
+  try {
+    const fullSubject = await PublicAPI.getSubject(subjectId);
+    const sections = fullSubject.sections || [];
+    const chapters = [];
+    sections.forEach((sec) => {
+      (sec.chapters || []).forEach((ch) => {
+        chapters.push({ ...ch, sectionName: sec.name });
+      });
+    });
+
+    subjectCache[subjectId] = { sections, chapters };
+    state.sections = sections;
+    state.chapters = chapters;
+
+    showDetailsSection();
+    updateFooter();
+  } catch (error) {
+    console.error(error);
+    showToast("Failed to load chapters", "error");
+    document.getElementById("section3").innerHTML = `
+      <div class="admin-empty">
+        <div class="admin-empty-icon">❌</div>
+        <div class="admin-empty-title">Failed to load chapters</div>
+      </div>`;
+  }
 }
 
 // ============================================================
 // DETAILS
 // ============================================================
+
+function showDetailsSectionSkeleton() {
+  document.getElementById("section3").style.display = "block";
+
+  if (state.examType === "chapter") {
+    document.getElementById("chapterBlock").style.display = "block";
+    document.getElementById("chapterSelectWrapper").innerHTML = `
+      <div style="background:var(--color-card);border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:24px;text-align:center">
+        <div class="admin-spinner" style="margin:0 auto 12px"></div>
+        <div style="font-size:13px;color:var(--color-text-muted);font-weight:600">Loading chapters...</div>
+      </div>`;
+  } else {
+    document.getElementById("chapterBlock").style.display = "none";
+  }
+}
 
 function showDetailsSection() {
   document.getElementById("section3").style.display = "block";
@@ -271,7 +318,7 @@ function highlightSection(sectionId) {
 }
 
 // ============================================================
-// BEGIN EXAM — with Loading
+// BEGIN EXAM — No Loading Overlay, Just Redirect
 // ============================================================
 
 window.beginExam = async function () {
@@ -290,10 +337,6 @@ window.beginExam = async function () {
     duration_minutes: state.count,
   };
 
-  // Show loading overlay
-  const overlay = document.getElementById("loadingOverlay");
-  if (overlay) overlay.style.display = "flex";
-
   const btn = document.querySelector("#footerCta button");
   if (btn) { btn.disabled = true; btn.textContent = "Starting..."; }
 
@@ -301,12 +344,9 @@ window.beginExam = async function () {
     const response = await ExamAPI.start(payload);
     localStorage.setItem("currentTestId", response.test_id);
     localStorage.setItem("currentTestData", JSON.stringify(response));
-
-    // Instant redirect
     window.location.href = "exam.html";
   } catch (error) {
     console.error("Begin exam error:", error);
-    if (overlay) overlay.style.display = "none";
     showToast(error.message || "Failed to start exam", "error");
     if (btn) { btn.disabled = false; btn.textContent = "Begin →"; }
   }
