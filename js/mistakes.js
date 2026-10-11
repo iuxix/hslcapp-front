@@ -1,9 +1,8 @@
 // ============================================================
-// MISTAKES — Real API
+// MISTAKES — Redesigned
 // ============================================================
 
 let allMistakes = [];
-let currentFilter = "all";
 
 (async function () {
   if (!requireLogin()) return;
@@ -15,10 +14,9 @@ let currentFilter = "all";
   } catch (e) {
     console.error(e);
     document.getElementById("mistakesMain").innerHTML = `
-      <div class="admin-empty">
-        <div class="admin-empty-icon">❌</div>
-        <div class="admin-empty-title">Failed to load</div>
-        <div class="admin-empty-text">${escapeHtml(e.message)}</div>
+      <div class="empty-state">
+        <div class="empty-icon">❌</div>
+        <div class="empty-text">Failed to load</div>
       </div>`;
   }
 })();
@@ -28,10 +26,9 @@ function renderPage() {
 
   if (allMistakes.length === 0) {
     main.innerHTML = `
-      <div class="admin-empty">
-        <div class="admin-empty-icon">🎉</div>
-        <div class="admin-empty-title">No mistakes yet</div>
-        <div class="admin-empty-text">Take a test and wrong answers will appear here</div>
+      <div class="empty-state">
+        <div class="empty-icon">🎉</div>
+        <div class="empty-text">No mistakes yet!<br>Take a test and wrong answers will appear here.</div>
         <button class="btn btn-primary" style="margin-top:16px" onclick="window.location.href='exam-start.html'">Start Exam</button>
       </div>`;
     return;
@@ -45,16 +42,24 @@ function renderPage() {
   });
 
   main.innerHTML = `
-    <div class="stat-grid" style="margin-bottom:24px">
-      <div class="stat-box danger"><div class="v">${allMistakes.length}</div><div class="l">Total Mistakes</div></div>
-      <div class="stat-box"><div class="v">${Object.keys(byChapter).length}</div><div class="l">Chapters</div></div>
+    <div class="stat-grid" style="margin-bottom:20px">
+      <div class="stat-box danger">
+        <div class="v">${allMistakes.length}</div>
+        <div class="l">Total Mistakes</div>
+      </div>
+      <div class="stat-box">
+        <div class="v">${Object.keys(byChapter).length}</div>
+        <div class="l">Chapters</div>
+      </div>
     </div>
 
-    <div class="action-row" style="margin-bottom:16px">
-      <button class="btn btn-primary btn-block" onclick="practiceMistakes()">📖 Practice All Mistakes</button>
+    <div class="action-row" style="margin-bottom:20px">
+      <button class="btn btn-primary btn-block" onclick="practiceMistakes()">
+        📖 Practice All Mistakes
+      </button>
     </div>
 
-    <div class="chips" id="chapterChips">
+    <div class="chips" id="chapterChips" style="margin-bottom:16px">
       <button class="chip active" onclick="filterMistakes(this, 'all')">All (${allMistakes.length})</button>
       ${Object.entries(byChapter).map(([chId, list]) => `
         <button class="chip" onclick="filterMistakes(this, '${chId}')">
@@ -82,17 +87,24 @@ function renderMistakes(list) {
 
   el.innerHTML = list.map((m) => `
     <div class="mistake-card">
-      <div class="mistake-q">${escapeHtml(m.question_text)}</div>
-      <div class="mistake-answers">
-        <span class="wrong">Your: ${m.your_last_answer || "—"}</span>
-        <span class="right">Correct: ${m.correct_option}</span>
-      </div>
-      ${m.explanation ? `<div class="mistake-explanation">${escapeHtml(m.explanation)}</div>` : ""}
-      <div class="mistake-meta">
-        <span>📚 Chapter ${m.chapter_id}</span>
-        ${m.topic_id ? `<span>🎯 Topic ${m.topic_id}</span>` : ""}
+      <div class="mistake-header">
+        <span class="mistake-tag">✗ Wrong</span>
         <span class="badge badge-${m.difficulty === 'easy' ? 'success' : 'danger'}" style="font-size:10px">${m.difficulty}</span>
-        <span>❌ Wrong ${m.times_wrong}x</span>
+      </div>
+
+      <div class="mistake-q">${escapeHtml(m.question_text)}</div>
+
+      <div class="mistake-answers">
+        <span class="mistake-answer-pill wrong">Your: ${m.your_last_answer || "—"}</span>
+        <span class="mistake-answer-pill right">Correct: ${m.correct_option}</span>
+      </div>
+
+      ${m.explanation ? `<div class="mistake-explanation">${escapeHtml(m.explanation)}</div>` : ""}
+
+      <div class="mistake-meta">
+        <span class="mistake-meta-item">📚 Chapter ${m.chapter_id}</span>
+        ${m.topic_id ? `<span class="mistake-meta-item">🎯 Topic ${m.topic_id}</span>` : ""}
+        <span class="mistake-meta-item">❌ Wrong ${m.times_wrong}x</span>
       </div>
     </div>
   `).join("");
@@ -102,7 +114,6 @@ function filterMistakes(btn, chapterId) {
   document.querySelectorAll("#chapterChips .chip").forEach((c) => c.classList.remove("active"));
   btn.classList.add("active");
 
-  currentFilter = chapterId;
   const filtered = chapterId === "all"
     ? allMistakes
     : allMistakes.filter((m) => m.chapter_id === parseInt(chapterId));
@@ -110,16 +121,14 @@ function filterMistakes(btn, chapterId) {
   renderMistakes(filtered);
 }
 
-function practiceMistakes() {
+async function practiceMistakes() {
   if (allMistakes.length === 0) {
     showToast("No mistakes to practice", "error");
     return;
   }
 
-  // Get unique chapter IDs
   const chapterIds = [...new Set(allMistakes.map((m) => m.chapter_id))];
 
-  // Start a chapter test with these chapters
   const payload = {
     exam_type: "chapter",
     subject_id: allMistakes[0].subject_id,
@@ -129,12 +138,9 @@ function practiceMistakes() {
     duration_minutes: Math.min(allMistakes.length, 30),
   };
 
-  startPractice(payload);
-}
+  showToast("Starting practice...", "info", 1000);
 
-async function startPractice(payload) {
   try {
-    showToast("Starting practice...", "info", 1000);
     const response = await ExamAPI.start(payload);
     localStorage.setItem("currentTestId", response.test_id);
     localStorage.setItem("currentTestData", JSON.stringify(response));
