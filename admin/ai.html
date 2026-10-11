@@ -25,61 +25,79 @@
     </header>
 
     <main class="admin-main">
-      <!-- Status Card -->
       <div id="statusCard" style="margin-bottom:20px"></div>
 
-      <!-- Form -->
       <div class="info-card" style="padding:0;overflow:hidden">
 
-        <!-- Section: Subject -->
+        <!-- 1. Subject -->
         <div style="padding:18px 20px;border-bottom:1px solid var(--color-border)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <span style="width:24px;height:24px;border-radius:50%;background:var(--color-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">1</span>
-            <span style="font-size:13px;font-weight:800;color:var(--color-text)">Subject</span>
+            <span class="ai-step-num">1</span>
+            <span class="ai-step-label">Subject</span>
           </div>
           <div id="subjectSelectWrapper"></div>
         </div>
 
-        <!-- Section: Chapter -->
+        <!-- 2. Chapter -->
         <div style="padding:18px 20px;border-bottom:1px solid var(--color-border)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <span style="width:24px;height:24px;border-radius:50%;background:var(--color-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">2</span>
-            <span style="font-size:13px;font-weight:800;color:var(--color-text)">Chapter</span>
+            <span class="ai-step-num">2</span>
+            <span class="ai-step-label">Chapter</span>
           </div>
           <div id="chapterSelectWrapper"></div>
         </div>
 
-        <!-- Section: Difficulty -->
+        <!-- 3. Difficulty -->
         <div style="padding:18px 20px;border-bottom:1px solid var(--color-border)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <span style="width:24px;height:24px;border-radius:50%;background:var(--color-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">3</span>
-            <span style="font-size:13px;font-weight:800;color:var(--color-text)">Difficulty</span>
+            <span class="ai-step-num">3</span>
+            <span class="ai-step-label">Difficulty</span>
           </div>
           <div class="chip-row" id="difficultyChips">
-            <button class="chip active" data-diff="easy" onclick="selectDifficulty(this)">🌱 Easy</button>
-            <button class="chip" data-diff="hard" onclick="selectDifficulty(this)">🔥 Hard</button>
+            <button type="button" class="chip active" data-diff="easy" onclick="selectDifficulty(this)">🌱 Easy</button>
+            <button type="button" class="chip" data-diff="hard" onclick="selectDifficulty(this)">🔥 Hard</button>
           </div>
         </div>
 
-        <!-- Section: Count -->
+        <!-- 4. Count -->
         <div style="padding:18px 20px;border-bottom:1px solid var(--color-border)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <span style="width:24px;height:24px;border-radius:50%;background:var(--color-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">4</span>
-            <span style="font-size:13px;font-weight:800;color:var(--color-text)">How many questions?</span>
+            <span class="ai-step-num">4</span>
+            <span class="ai-step-label">Number of Questions</span>
           </div>
-          <div class="chip-row" id="countChips">
-            <button class="chip" data-count="5" onclick="selectCount(this)">5</button>
-            <button class="chip active" data-count="10" onclick="selectCount(this)">10</button>
-            <button class="chip" data-count="15" onclick="selectCount(this)">15</button>
-            <button class="chip" data-count="20" onclick="selectCount(this)">20</button>
+
+          <!-- Quick chips -->
+          <div class="chip-row" style="margin-bottom:12px">
+            <button type="button" class="chip" data-count="5" onclick="selectCount(this)">5</button>
+            <button type="button" class="chip active" data-count="10" onclick="selectCount(this)">10</button>
+            <button type="button" class="chip" data-count="15" onclick="selectCount(this)">15</button>
+            <button type="button" class="chip" data-count="20" onclick="selectCount(this)">20</button>
+          </div>
+
+          <!-- Custom input -->
+          <div style="display:flex;align-items:center;gap:10px">
+            <span style="font-size:12px;font-weight:700;color:var(--color-text-muted);text-transform:uppercase;letter-spacing:0.05em">Custom:</span>
+            <input
+              type="number"
+              id="customCount"
+              min="1"
+              max="20"
+              placeholder="Enter 1-20"
+              class="input-full"
+              style="flex:1;padding:10px 14px;font-size:14px;font-weight:700"
+              oninput="onCustomCountInput(this)"
+            />
+          </div>
+          <div style="font-size:11px;color:var(--color-text-muted);margin-top:8px">
+            ⚡ Max 20 questions per generation (Gemini limit)
           </div>
         </div>
 
-        <!-- Section: Material -->
+        <!-- 5. Material -->
         <div style="padding:18px 20px;border-bottom:1px solid var(--color-border)">
           <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
-            <span style="width:24px;height:24px;border-radius:50%;background:var(--color-warning);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">5</span>
-            <span style="font-size:13px;font-weight:800;color:var(--color-text)">Study Material</span>
+            <span class="ai-step-num" style="background:var(--color-warning)">5</span>
+            <span class="ai-step-label">Study Material</span>
             <span class="badge badge-muted" style="font-size:9px">OPTIONAL</span>
           </div>
           <textarea id="materialInput" class="textarea-full" placeholder="Paste chapter content here — AI will use this as the primary source." style="min-height:100px"></textarea>
@@ -88,7 +106,7 @@
           </div>
         </div>
 
-        <!-- Section: Generate -->
+        <!-- Generate -->
         <div style="padding:18px 20px;background:var(--color-bg)">
           <button class="btn btn-primary btn-block" id="generateBtn" onclick="generateQuestions()" style="min-height:52px;font-size:15px">
             ✨ Generate Questions with AI
@@ -96,13 +114,33 @@
         </div>
       </div>
 
-      <!-- Results -->
       <div id="resultArea" style="margin-top:24px"></div>
     </main>
   </div>
 
   <div id="toastContainer" class="toast-container"></div>
   <div id="modalRoot"></div>
+
+  <style>
+    .ai-step-num {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: var(--color-primary);
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .ai-step-label {
+      font-size: 13px;
+      font-weight: 800;
+      color: var(--color-text);
+    }
+  </style>
 
   <script src="../js/config.js"></script>
   <script src="../js/api.js"></script>
