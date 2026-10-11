@@ -69,7 +69,6 @@ async function loadSubjects() {
       return;
     }
 
-    // Bind subject selector
     setTimeout(() => {
       const wrapper = document.getElementById("subjectSelectWrapper");
       wrapper.innerHTML = buildCustomSelectHTML("subjectSelect", "Choose subject");
@@ -79,7 +78,6 @@ async function loadSubjects() {
         loadChaptersForSubject,
         state.subjects[0].id
       );
-      // Load chapters for first subject
       loadChaptersForSubject(state.subjects[0].id);
     }, 100);
 
@@ -109,7 +107,6 @@ async function loadChaptersForSubject(subjectId) {
       return;
     }
 
-    // Re-bind chapter selector
     const chapWrapper = document.getElementById("chapterSelectWrapper");
     chapWrapper.innerHTML = buildCustomSelectHTML("chapterSelect", "Choose chapter");
     chapterSelector = bindCustomSelect(
@@ -126,21 +123,72 @@ async function loadChaptersForSubject(subjectId) {
   }
 }
 
+// ============================================================
+// DIFFICULTY SELECT
+// ============================================================
+
 window.selectDifficulty = function (btn) {
-  document.querySelectorAll("#difficultyChips .chip").forEach((c) => c.classList.remove("active"));
+  document.querySelectorAll("#difficultyChips .chip").forEach((c) => {
+    c.classList.remove("active");
+  });
   btn.classList.add("active");
   state.difficulty = btn.dataset.diff;
+  console.log("Difficulty set to:", state.difficulty);
 };
 
+// ============================================================
+// COUNT SELECT — chip OR custom input
+// ============================================================
+
 window.selectCount = function (btn) {
-  document.querySelectorAll("#countChips .chip").forEach((c) => c.classList.remove("active"));
+  document.querySelectorAll("#countChips .chip, [data-count]").forEach((c) => {
+    c.classList.remove("active");
+  });
+
+  // Clear custom input
+  const customInput = document.getElementById("customCount");
+  if (customInput) customInput.value = "";
+
   btn.classList.add("active");
   state.count = parseInt(btn.dataset.count);
+  console.log("Count set to:", state.count);
 };
+
+window.onCustomCountInput = function (input) {
+  const val = parseInt(input.value);
+
+  // Clear chip selection
+  document.querySelectorAll("[data-count]").forEach((c) => {
+    c.classList.remove("active");
+  });
+
+  if (!val || val < 1) {
+    state.count = 0;
+    return;
+  }
+
+  if (val > 20) {
+    input.value = 20;
+    state.count = 20;
+    showToast("Max 20 questions per generation", "info", 2000);
+    return;
+  }
+
+  state.count = val;
+};
+
+// ============================================================
+// GENERATE
+// ============================================================
 
 async function generateQuestions() {
   if (!state.chapterId) {
     showToast("Select a chapter", "error");
+    return;
+  }
+
+  if (!state.count || state.count < 1) {
+    showToast("Enter a valid count (1-20)", "error");
     return;
   }
 
@@ -250,7 +298,7 @@ async function generateQuestions() {
     `;
   } finally {
     btn.disabled = false;
-    btn.textContent = "✨ Generate with AI";
+    btn.textContent = "✨ Generate Questions with AI";
   }
 }
 
