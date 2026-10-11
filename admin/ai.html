@@ -3,11 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>AI — Admin</title>
+  <title>AI Generation — Admin</title>
   <link rel="stylesheet" href="../css/base.css" />
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/dashboard.css" />
   <link rel="stylesheet" href="../css/admin.css" />
+  <link rel="stylesheet" href="../css/custom-select.css" />
 </head>
 <body>
   <div class="admin-shell">
@@ -16,27 +17,74 @@
         <div class="admin-header-title">
           <button class="admin-back-btn" onclick="window.location.href='dashboard.html'">←</button>
           <div>
-            <h2>AI Generation</h2>
-            <p>Coming soon</p>
+            <h2>🤖 AI Generation</h2>
+            <p id="statusText">Checking connection...</p>
           </div>
         </div>
       </div>
     </header>
 
     <main class="admin-main">
-      <div class="admin-empty">
-        <div class="admin-empty-icon">🤖</div>
-        <div class="admin-empty-title">AI Generation</div>
-        <div class="admin-empty-text">AI-powered question generation coming in Phase 10.<br>Gemini integration in progress.</div>
+      <!-- Status -->
+      <div id="statusCard" style="margin-bottom:20px"></div>
+
+      <!-- Form -->
+      <div class="info-card" style="padding:20px">
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Subject</label>
+          <div id="subjectSelectWrapper"></div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Chapter</label>
+          <div id="chapterSelectWrapper"></div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Difficulty</label>
+          <div class="chip-row" id="difficultyChips">
+            <button class="chip active" data-diff="easy" onclick="selectDifficulty(this)">Easy</button>
+            <button class="chip" data-diff="hard" onclick="selectDifficulty(this)">Hard</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:14px">
+          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">How many questions?</label>
+          <div class="chip-row" id="countChips">
+            <button class="chip" data-count="5" onclick="selectCount(this)">5</button>
+            <button class="chip active" data-count="10" onclick="selectCount(this)">10</button>
+            <button class="chip" data-count="15" onclick="selectCount(this)">15</button>
+            <button class="chip" data-count="20" onclick="selectCount(this)">20</button>
+          </div>
+        </div>
+
+        <div style="margin-bottom:20px">
+          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Study Material (optional)</label>
+          <textarea id="materialInput" class="textarea-full" placeholder="Paste chapter content here — AI will use this as primary source." style="min-height:100px"></textarea>
+          <div style="font-size:11px;color:var(--color-text-muted);margin-top:6px">
+            Leave empty to use general knowledge.
+          </div>
+        </div>
+
+        <button class="btn btn-primary btn-block" id="generateBtn" onclick="generateQuestions()">
+          ✨ Generate with AI
+        </button>
       </div>
+
+      <!-- Results -->
+      <div id="resultArea" style="margin-top:24px"></div>
     </main>
   </div>
 
   <div id="toastContainer" class="toast-container"></div>
+  <div id="modalRoot"></div>
 
   <script src="../js/config.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/toast.js"></script>
+  <script src="../js/modal.js"></script>
+  <script src="../js/custom-select.js"></script>
   <script src="../js/auth.js"></script>
+  <script src="../js/admin-ai.js"></script>
 </body>
 </html>
