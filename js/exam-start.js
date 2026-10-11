@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM START — 5 Exam Types + Cache + Retry + Card Reset Fix
+// EXAM START — 5 Exam Types + AI Enabled
 // ============================================================
 
 let state = {
@@ -13,7 +13,6 @@ let state = {
   count: 30,
 };
 
-// Cache — already loaded subjects
 const subjectCache = {};
 
 (function () {
@@ -35,14 +34,14 @@ async function loadSubjectsAndRender() {
 }
 
 // ============================================================
-// 5 EXAM TYPES
+// 5 EXAM TYPES — AI Enabled
 // ============================================================
 
 function renderExamTypes() {
   const types = [
     { id: "full", icon: "📝", title: "Full Test", sub: "All chapters, mixed", bg: "#EEF2FF" },
     { id: "chapter", icon: "📖", title: "Chapter Test", sub: "Pick specific chapters", bg: "#CCFBF1" },
-    { id: "ai", icon: "🤖", title: "AI Generated", sub: "Coming soon", bg: "#F3E8FF", disabled: true },
+    { id: "ai", icon: "🤖", title: "AI Generated", sub: "Practice AI questions", bg: "#F3E8FF" },
     { id: "hots", icon: "💡", title: "HOTS", sub: "Coming soon", bg: "#FEF3C7", disabled: true },
     { id: "theory", icon: "📚", title: "Theory Test", sub: "Coming soon", bg: "#EEF2F7", disabled: true },
   ];
@@ -129,7 +128,6 @@ async function selectSubject(subjectId, clickedCard) {
     c.classList.toggle("selected", parseInt(c.dataset.subject) === subjectId);
   });
 
-  // If cached — instant go
   if (subjectCache[subjectId]) {
     state.sections = subjectCache[subjectId].sections;
     state.chapters = subjectCache[subjectId].chapters;
@@ -139,14 +137,12 @@ async function selectSubject(subjectId, clickedCard) {
     return;
   }
 
-  // Show inline loading on card
   if (clickedCard) {
     clickedCard.style.pointerEvents = "none";
     const meta = clickedCard.querySelector(".subject-meta");
     if (meta) meta.textContent = "Loading...";
   }
 
-  // Go to Step 3 immediately with skeleton
   updateStepper(3);
   showDetailsSectionSkeleton();
   updateFooter();
@@ -165,7 +161,6 @@ async function selectSubject(subjectId, clickedCard) {
     state.sections = sections;
     state.chapters = chapters;
 
-    // Reset card text
     if (clickedCard) {
       clickedCard.style.pointerEvents = "auto";
       const meta = clickedCard.querySelector(".subject-meta");
@@ -179,7 +174,6 @@ async function selectSubject(subjectId, clickedCard) {
     console.error(error);
     showToast("Failed to load chapters", "error");
 
-    // Reset card on error
     if (clickedCard) {
       clickedCard.style.pointerEvents = "auto";
       const meta = clickedCard.querySelector(".subject-meta");
@@ -196,13 +190,13 @@ async function selectSubject(subjectId, clickedCard) {
 }
 
 // ============================================================
-// DETAILS
+// DETAILS — Chapter for chapter AND ai
 // ============================================================
 
 function showDetailsSectionSkeleton() {
   document.getElementById("section3").style.display = "block";
 
-  if (state.examType === "chapter") {
+  if (state.examType === "chapter" || state.examType === "ai") {
     document.getElementById("chapterBlock").style.display = "block";
     document.getElementById("chapterSelectWrapper").innerHTML = `
       <div style="background:var(--color-card);border:1.5px solid var(--color-border);border-radius:var(--radius-md);padding:24px;text-align:center">
@@ -217,7 +211,7 @@ function showDetailsSectionSkeleton() {
 function showDetailsSection() {
   document.getElementById("section3").style.display = "block";
 
-  if (state.examType === "chapter") {
+  if (state.examType === "chapter" || state.examType === "ai") {
     document.getElementById("chapterBlock").style.display = "block";
     renderChapterSelector();
   } else {
@@ -335,20 +329,22 @@ function highlightSection(sectionId) {
 }
 
 // ============================================================
-// BEGIN EXAM — with Retry Logic
+// BEGIN EXAM — with AI support
 // ============================================================
 
 window.beginExam = async function () {
   if (!state.examType) { highlightSection("section1"); showToast("Select exam type", "error"); return; }
   if (!state.subjectId) { highlightSection("section2"); showToast("Select a subject", "error"); return; }
-  if (state.examType === "chapter" && state.chapterIds.length === 0) {
+
+  // Chapter required for chapter AND ai
+  if ((state.examType === "chapter" || state.examType === "ai") && state.chapterIds.length === 0) {
     highlightSection("chapterBlock"); showToast("Select at least one chapter", "error"); return;
   }
 
   const payload = {
     exam_type: state.examType,
     subject_id: state.subjectId,
-    chapter_ids: state.examType === "chapter" ? state.chapterIds : null,
+    chapter_ids: (state.examType === "chapter" || state.examType === "ai") ? state.chapterIds : null,
     difficulty: state.difficulty,
     count: state.count,
     duration_minutes: state.count,
@@ -406,9 +402,7 @@ window.beginExam = async function () {
 
       if (isRetryable && retries < maxRetries) {
         retries++;
-        console.log(`Retrying... attempt ${retries}`);
         showToast(`Backend waking up... retry ${retries}/${maxRetries}`, "info", 2000);
-
         await new Promise((r) => setTimeout(r, 3000));
         return attemptStart();
       }
