@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/dashboard.css" />
   <link rel="stylesheet" href="../css/admin.css" />
+  <link rel="stylesheet" href="../css/exam-start.css" />
   <link rel="stylesheet" href="../css/custom-select.css" />
 </head>
 <body>
@@ -67,7 +68,7 @@
           </div>
 
           <!-- Quick chips -->
-          <div class="chip-row" style="margin-bottom:12px">
+          <div class="chip-row" style="margin-bottom:12px" id="countChips">
             <button type="button" class="chip" data-count="5" onclick="selectCount(this)">5</button>
             <button type="button" class="chip active" data-count="10" onclick="selectCount(this)">10</button>
             <button type="button" class="chip" data-count="15" onclick="selectCount(this)">15</button>
@@ -122,6 +123,7 @@
   <div id="modalRoot"></div>
 
   <style>
+    /* Step numbers */
     .ai-step-num {
       width: 24px;
       height: 24px;
@@ -135,10 +137,44 @@
       font-weight: 800;
       flex-shrink: 0;
     }
+
     .ai-step-label {
       font-size: 13px;
       font-weight: 800;
       color: var(--color-text);
+    }
+
+    /* Chips — FIXED */
+    .chip-row {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip {
+      padding: 10px 18px;
+      background: var(--color-card);
+      border: 1.5px solid var(--color-border);
+      border-radius: 999px;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--color-text-muted);
+      cursor: pointer;
+      transition: all 180ms cubic-bezier(0.16, 1, 0.3, 1);
+      font-family: inherit;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .chip:active {
+      transform: scale(0.95);
+    }
+
+    .chip.active {
+      background: var(--color-primary);
+      color: #fff;
+      border-color: var(--color-primary);
+      box-shadow: 0 4px 12px rgba(99, 102, 241, 0.25);
+      transform: translateY(-1px);
     }
   </style>
 
