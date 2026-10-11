@@ -25,31 +25,48 @@
     </header>
 
     <main class="admin-main">
-      <!-- Status -->
+      <!-- Status Card -->
       <div id="statusCard" style="margin-bottom:20px"></div>
 
       <!-- Form -->
-      <div class="info-card" style="padding:20px">
-        <div style="margin-bottom:14px">
-          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Subject</label>
+      <div class="info-card" style="padding:0;overflow:hidden">
+
+        <!-- Section: Subject -->
+        <div style="padding:18px 20px;border-bottom:1px solid var(--color-border)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="width:24px;height:24px;border-radius:50%;background:var(--color-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">1</span>
+            <span style="font-size:13px;font-weight:800;color:var(--color-text)">Subject</span>
+          </div>
           <div id="subjectSelectWrapper"></div>
         </div>
 
-        <div style="margin-bottom:14px">
-          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Chapter</label>
+        <!-- Section: Chapter -->
+        <div style="padding:18px 20px;border-bottom:1px solid var(--color-border)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="width:24px;height:24px;border-radius:50%;background:var(--color-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">2</span>
+            <span style="font-size:13px;font-weight:800;color:var(--color-text)">Chapter</span>
+          </div>
           <div id="chapterSelectWrapper"></div>
         </div>
 
-        <div style="margin-bottom:14px">
-          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Difficulty</label>
+        <!-- Section: Difficulty -->
+        <div style="padding:18px 20px;border-bottom:1px solid var(--color-border)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="width:24px;height:24px;border-radius:50%;background:var(--color-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">3</span>
+            <span style="font-size:13px;font-weight:800;color:var(--color-text)">Difficulty</span>
+          </div>
           <div class="chip-row" id="difficultyChips">
-            <button class="chip active" data-diff="easy" onclick="selectDifficulty(this)">Easy</button>
-            <button class="chip" data-diff="hard" onclick="selectDifficulty(this)">Hard</button>
+            <button class="chip active" data-diff="easy" onclick="selectDifficulty(this)">🌱 Easy</button>
+            <button class="chip" data-diff="hard" onclick="selectDifficulty(this)">🔥 Hard</button>
           </div>
         </div>
 
-        <div style="margin-bottom:14px">
-          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">How many questions?</label>
+        <!-- Section: Count -->
+        <div style="padding:18px 20px;border-bottom:1px solid var(--color-border)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="width:24px;height:24px;border-radius:50%;background:var(--color-primary);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">4</span>
+            <span style="font-size:13px;font-weight:800;color:var(--color-text)">How many questions?</span>
+          </div>
           <div class="chip-row" id="countChips">
             <button class="chip" data-count="5" onclick="selectCount(this)">5</button>
             <button class="chip active" data-count="10" onclick="selectCount(this)">10</button>
@@ -58,17 +75,25 @@
           </div>
         </div>
 
-        <div style="margin-bottom:20px">
-          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Study Material (optional)</label>
-          <textarea id="materialInput" class="textarea-full" placeholder="Paste chapter content here — AI will use this as primary source." style="min-height:100px"></textarea>
-          <div style="font-size:11px;color:var(--color-text-muted);margin-top:6px">
-            Leave empty to use general knowledge.
+        <!-- Section: Material -->
+        <div style="padding:18px 20px;border-bottom:1px solid var(--color-border)">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px">
+            <span style="width:24px;height:24px;border-radius:50%;background:var(--color-warning);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800">5</span>
+            <span style="font-size:13px;font-weight:800;color:var(--color-text)">Study Material</span>
+            <span class="badge badge-muted" style="font-size:9px">OPTIONAL</span>
+          </div>
+          <textarea id="materialInput" class="textarea-full" placeholder="Paste chapter content here — AI will use this as the primary source." style="min-height:100px"></textarea>
+          <div style="font-size:11px;color:var(--color-text-muted);margin-top:8px;line-height:1.5">
+            💡 Leave empty to use general knowledge. For best results, provide chapter content.
           </div>
         </div>
 
-        <button class="btn btn-primary btn-block" id="generateBtn" onclick="generateQuestions()">
-          ✨ Generate with AI
-        </button>
+        <!-- Section: Generate -->
+        <div style="padding:18px 20px;background:var(--color-bg)">
+          <button class="btn btn-primary btn-block" id="generateBtn" onclick="generateQuestions()" style="min-height:52px;font-size:15px">
+            ✨ Generate Questions with AI
+          </button>
+        </div>
       </div>
 
       <!-- Results -->
