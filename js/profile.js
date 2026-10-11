@@ -1,5 +1,5 @@
 // ============================================================
-// PROFILE — Real API
+// PROFILE — Redesigned
 // ============================================================
 
 (async function () {
@@ -19,8 +19,7 @@
     renderProfile(me, dashboard);
   } catch (e) {
     console.error(e);
-    // Fallback to session data
-    renderProfile(session, { total_tests: 0, average_accuracy: 0, best_score: 0 });
+    renderProfile(session, { total_tests: 0, average_accuracy: 0, best_score: 0, streak_days: 0 });
   }
 })();
 
@@ -33,14 +32,26 @@ function renderProfile(user, stats) {
       <div class="profile-avatar">${initials}</div>
       <div class="profile-name">${escapeHtml(user.full_name || user.username)}</div>
       <div class="profile-role">@${escapeHtml(user.username)} · Class 10</div>
-      ${user.role === "admin" ? '<div class="badge badge-warning" style="margin-top:8px">Admin</div>' : ""}
+      ${user.role === "admin" ? '<div class="profile-badge">Admin</div>' : ""}
     </div>
 
     <div class="stat-grid" style="margin-bottom:24px">
-      <div class="stat-box"><div class="v">${stats.total_tests || 0}</div><div class="l">Tests</div></div>
-      <div class="stat-box success"><div class="v">${Math.round(stats.average_accuracy || 0)}%</div><div class="l">Accuracy</div></div>
-      <div class="stat-box"><div class="v">${Math.round(stats.best_score || 0)}%</div><div class="l">Best</div></div>
-      <div class="stat-box warning"><div class="v">${stats.streak_days || 0}🔥</div><div class="l">Streak</div></div>
+      <div class="stat-box">
+        <div class="v">${stats.total_tests || 0}</div>
+        <div class="l">Tests</div>
+      </div>
+      <div class="stat-box success">
+        <div class="v">${Math.round(stats.average_accuracy || 0)}%</div>
+        <div class="l">Accuracy</div>
+      </div>
+      <div class="stat-box">
+        <div class="v">${Math.round(stats.best_score || 0)}%</div>
+        <div class="l">Best</div>
+      </div>
+      <div class="stat-box warning">
+        <div class="v">${stats.streak_days || 0}🔥</div>
+        <div class="l">Streak</div>
+      </div>
     </div>
 
     <section class="section">
@@ -57,10 +68,6 @@ function renderProfile(user, stats) {
         <div class="info-row">
           <span class="info-label">Role</span>
           <span class="info-value">${escapeHtml(user.role || "student")}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">Class</span>
-          <span class="info-value">10</span>
         </div>
         <div class="info-row">
           <span class="info-label">Joined</span>
