@@ -1,5 +1,5 @@
 // ============================================================
-// PROFILE — Redesigned
+// PROFILE — Redesigned Info Rows
 // ============================================================
 
 (async function () {
@@ -31,8 +31,9 @@ function renderProfile(user, stats) {
     <div class="profile-header">
       <div class="profile-avatar">${initials}</div>
       <div class="profile-name">${escapeHtml(user.full_name || user.username)}</div>
-      <div class="profile-role">@${escapeHtml(user.username)} · Class 10</div>
-      ${user.role === "admin" ? '<div class="profile-badge">Admin</div>' : ""}
+      <div class="profile-role">@${escapeHtml(user.username)}</div>
+      <div class="profile-badge">Class 10 · SEBA HSLC</div>
+      ${user.role === "admin" ? '<div class="profile-badge" style="margin-left:6px;background:linear-gradient(135deg,#F59E0B,#D97706)">🛡️ Admin</div>' : ""}
     </div>
 
     <div class="stat-grid" style="margin-bottom:24px">
@@ -46,32 +47,51 @@ function renderProfile(user, stats) {
       </div>
       <div class="stat-box">
         <div class="v">${Math.round(stats.best_score || 0)}%</div>
-        <div class="l">Best</div>
+        <div class="l">Best Score</div>
       </div>
       <div class="stat-box warning">
         <div class="v">${stats.streak_days || 0}🔥</div>
-        <div class="l">Streak</div>
+        <div class="l">Day Streak</div>
       </div>
     </div>
 
     <section class="section">
-      <h3 class="section-title">⚙️ Account</h3>
-      <div class="info-card">
-        <div class="info-row">
-          <span class="info-label">Username</span>
-          <span class="info-value">${escapeHtml(user.username)}</span>
+      <h3 class="section-title">⚙️ Account Info</h3>
+      <div class="info-card" style="padding:0">
+        <div class="profile-info-row">
+          <div class="profile-info-icon">👤</div>
+          <div class="profile-info-content">
+            <div class="profile-info-label">Username</div>
+            <div class="profile-info-value">${escapeHtml(user.username)}</div>
+          </div>
         </div>
-        <div class="info-row">
-          <span class="info-label">Email</span>
-          <span class="info-value" style="font-size:12px">${escapeHtml(user.email || "—")}</span>
+        <div class="profile-info-row">
+          <div class="profile-info-icon">📧</div>
+          <div class="profile-info-content">
+            <div class="profile-info-label">Email</div>
+            <div class="profile-info-value">${escapeHtml(user.email || "Not set")}</div>
+          </div>
         </div>
-        <div class="info-row">
-          <span class="info-label">Role</span>
-          <span class="info-value">${escapeHtml(user.role || "student")}</span>
+        <div class="profile-info-row">
+          <div class="profile-info-icon">🎓</div>
+          <div class="profile-info-content">
+            <div class="profile-info-label">Class</div>
+            <div class="profile-info-value">Class 10 (SEBA HSLC)</div>
+          </div>
         </div>
-        <div class="info-row">
-          <span class="info-label">Joined</span>
-          <span class="info-value" style="font-size:12px">${user.created_at ? new Date(user.created_at).toLocaleDateString("en-IN") : "—"}</span>
+        <div class="profile-info-row">
+          <div class="profile-info-icon">🛡️</div>
+          <div class="profile-info-content">
+            <div class="profile-info-label">Role</div>
+            <div class="profile-info-value">${user.role === "admin" ? "Administrator" : "Student"}</div>
+          </div>
+        </div>
+        <div class="profile-info-row" style="border-bottom:none">
+          <div class="profile-info-icon">📅</div>
+          <div class="profile-info-content">
+            <div class="profile-info-label">Joined</div>
+            <div class="profile-info-value">${user.created_at ? new Date(user.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" }) : "—"}</div>
+          </div>
         </div>
       </div>
     </section>
@@ -81,7 +101,7 @@ function renderProfile(user, stats) {
         <button class="action-box action-box-primary action-box-medium" onclick="window.location.href='admin/dashboard.html'">
           <div class="box-icon">🛡️</div>
           <div class="box-content">
-            <div class="box-title">Admin Panel</div>
+            <div class="box-title">Open Admin Panel</div>
             <div class="box-sub">Manage users & content</div>
           </div>
           <div class="box-arrow">→</div>
