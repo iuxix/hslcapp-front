@@ -1,10 +1,18 @@
 // ============================================================
-// ADMIN — Questions Management + Bulk Import MCQ
+// ADMIN — Questions Management (Custom Selectors)
 // ============================================================
 
 let currentSubjects = [];
 let currentChapters = [];
 let parsedQuestions = [];
+
+let singleSubjectSel = null;
+let singleChapterSel = null;
+let singleCorrectSel = null;
+let singleDiffSel = null;
+
+let bulkSubjectSel = null;
+let bulkChapterSel = null;
 
 (function () {
   if (!requireAdmin()) return;
@@ -89,7 +97,7 @@ async function loadQuestions() {
 }
 
 // ============================================================
-// SINGLE QUESTION
+// SINGLE QUESTION — Custom Selectors
 // ============================================================
 
 async function openCreateQuestion() {
@@ -107,40 +115,50 @@ async function openCreateQuestion() {
   showModal({
     title: "Add Single Question",
     customContent: `
-      <div style="margin-bottom:10px">
-        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px">Subject</label>
-        <select id="qSubject" class="select-full" onchange="window.__loadChapters()">
-          ${currentSubjects.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
-        </select>
+      <div style="margin-bottom:12px">
+        <label class="modal-label">Subject</label>
+        <div id="singleSubjectWrap"></div>
       </div>
-      <div style="margin-bottom:10px">
-        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px">Chapter</label>
-        <select id="qChapter" class="select-full"><option>Loading...</option></select>
+      <div style="margin-bottom:12px">
+        <label class="modal-label">Chapter</label>
+        <div id="singleChapterWrap"></div>
       </div>
-      <div style="margin-bottom:10px">
-        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px">Question</label>
+      <div style="margin-bottom:12px">
+        <label class="modal-label">Question</label>
         <textarea id="qText" class="textarea-full" placeholder="Question... use $x^2$ for math" style="min-height:70px"></textarea>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div><label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">A</label><input type="text" id="qA" class="input-full" /></div>
-        <div><label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">B</label><input type="text" id="qB" class="input-full" /></div>
-        <div><label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">C</label><input type="text" id="qC" class="input-full" /></div>
-        <div><label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">D</label><input type="text" id="qD" class="input-full" /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+        <div><label class="modal-label">A</label><input type="text" id="qA" class="input-full" /></div>
+        <div><label class="modal-label">B</label><input type="text" id="qB" class="input-full" /></div>
+        <div><label class="modal-label">C</label><input type="text" id="qC" class="input-full" /></div>
+        <div><label class="modal-label">D</label><input type="text" id="qD" class="input-full" /></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
         <div>
-          <label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">Correct</label>
-          <select id="qCorrect" class="select-full"><option>A</option><option>B</option><option>C</option><option>D</option></select>
+          <label class="modal-label">Correct</label>
+          <div id="singleCorrectWrap"></div>
         </div>
         <div>
-          <label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">Difficulty</label>
-          <select id="qDiff" class="select-full"><option value="easy">Easy</option><option value="hard">Hard</option></select>
+          <label class="modal-label">Difficulty</label>
+          <div id="singleDiffWrap"></div>
         </div>
       </div>
       <div style="margin-bottom:10px">
-        <label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">Explanation</label>
+        <label class="modal-label">Explanation (optional)</label>
         <textarea id="qExplanation" class="textarea-full" style="min-height:50px"></textarea>
       </div>
+
+      <style>
+        .modal-label {
+          display: block;
+          font-size: 12px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--color-text-muted);
+          margin-bottom: 6px;
+        }
+      </style>
     `,
     actions: [
       { label: "Cancel", style: "outline", onClick: "closeModal()" },
@@ -148,44 +166,85 @@ async function openCreateQuestion() {
     ],
   });
 
-  setTimeout(() => window.__loadChapters(), 100);
+  // Bind custom selectors after DOM ready
+  setTimeout(() => {
+    // Subject
+    document.getElementById("singleSubjectWrap").innerHTML = buildCustomSelectHTML("singleSubjectSel", "Choose subject");
+    singleSubjectSel = bindCustomSelect(
+      "singleSubjectSel",
+      currentSubjects.map(s => ({ value: s.id, label: s.name })),
+      loadSingleChapters,
+      currentSubjects[0].id
+    );
+
+    // Correct
+    document.getElementById("singleCorrectWrap").innerHTML = buildCustomSelectHTML("singleCorrectSel", "A/B/C/D");
+    singleCorrectSel = bindCustomSelect(
+      "singleCorrectSel",
+      [
+        { value: "A", label: "A" },
+        { value: "B", label: "B" },
+        { value: "C", label: "C" },
+        { value: "D", label: "D" },
+      ],
+      null,
+      "A"
+    );
+
+    // Difficulty
+    document.getElementById("singleDiffWrap").innerHTML = buildCustomSelectHTML("singleDiffSel", "Difficulty");
+    singleDiffSel = bindCustomSelect(
+      "singleDiffSel",
+      [
+        { value: "easy", label: "🌱 Easy" },
+        { value: "hard", label: "🔥 Hard" },
+      ],
+      null,
+      "easy"
+    );
+
+    // Load chapters for first subject
+    loadSingleChapters(currentSubjects[0].id);
+  }, 100);
 }
 
-window.__loadChapters = async function () {
-  const subjId = parseInt(document.getElementById("qSubject").value);
-  const chapSel = document.getElementById("qChapter");
-  chapSel.innerHTML = `<option>Loading...</option>`;
+async function loadSingleChapters(subjectId) {
+  const wrap = document.getElementById("singleChapterWrap");
+  if (!wrap) return;
 
   try {
-    const fullSubject = await AdminAPI.getSubject(subjId);
-    currentChapters = [];
+    const fullSubject = await AdminAPI.getSubject(subjectId);
+    const chapters = [];
     (fullSubject.sections || []).forEach(sec => {
-      (sec.chapters || []).forEach(ch => currentChapters.push(ch));
+      (sec.chapters || []).forEach(ch => {
+        chapters.push({ value: ch.id, label: ch.name, group: sec.name });
+      });
     });
 
-    if (currentChapters.length === 0) {
-      chapSel.innerHTML = `<option value="">No chapters</option>`;
+    currentChapters = chapters;
+
+    if (chapters.length === 0) {
+      wrap.innerHTML = `<div style="font-size:12px;color:var(--color-danger);padding:10px">No chapters — add first</div>`;
       return;
     }
 
-    chapSel.innerHTML = currentChapters.map(c =>
-      `<option value="${c.id}">${escapeHtml(c.name)}</option>`
-    ).join("");
+    wrap.innerHTML = buildCustomSelectHTML("singleChapterSel", "Choose chapter");
+    singleChapterSel = bindCustomSelect("singleChapterSel", chapters, null, chapters[0].value);
   } catch (e) {
-    chapSel.innerHTML = `<option>Error</option>`;
+    wrap.innerHTML = `<div style="font-size:12px;color:var(--color-danger);padding:10px">Error loading chapters</div>`;
   }
-};
+}
 
 window.__doCreateQuestion = async function () {
-  const subjectId = parseInt(document.getElementById("qSubject").value);
-  const chapterId = parseInt(document.getElementById("qChapter").value);
+  const subjectId = singleSubjectSel ? parseInt(singleSubjectSel.getValue()) : null;
+  const chapterId = singleChapterSel ? parseInt(singleChapterSel.getValue()) : null;
   const text = document.getElementById("qText").value.trim();
   const optA = document.getElementById("qA").value.trim();
   const optB = document.getElementById("qB").value.trim();
   const optC = document.getElementById("qC").value.trim();
   const optD = document.getElementById("qD").value.trim();
-  const correct = document.getElementById("qCorrect").value;
-  const difficulty = document.getElementById("qDiff").value;
+  const correct = singleCorrectSel ? singleCorrectSel.getValue() : "A";
+  const difficulty = singleDiffSel ? singleDiffSel.getValue() : "easy";
   const explanation = document.getElementById("qExplanation").value.trim();
 
   if (!text || !optA || !optB || !optC || !optD) {
@@ -222,7 +281,7 @@ window.__doCreateQuestion = async function () {
 };
 
 // ============================================================
-// BULK IMPORT
+// BULK IMPORT — Custom Selectors
 // ============================================================
 
 async function openBulkImport() {
@@ -243,17 +302,15 @@ async function openBulkImport() {
     title: "📦 Bulk Import MCQ",
     customContent: `
       <div style="margin-bottom:12px">
-        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px">Subject *</label>
-        <select id="bulkSubject" class="select-full" onchange="window.__loadBulkChapters()">
-          ${currentSubjects.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
-        </select>
+        <label class="bulk-label">Subject</label>
+        <div id="bulkSubjectWrap"></div>
       </div>
       <div style="margin-bottom:12px">
-        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px">Chapter *</label>
-        <select id="bulkChapter" class="select-full"><option>Loading...</option></select>
+        <label class="bulk-label">Chapter</label>
+        <div id="bulkChapterWrap"></div>
       </div>
       <div style="margin-bottom:12px">
-        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px">Paste Questions *</label>
+        <label class="bulk-label">Paste Questions</label>
         <textarea id="bulkText" class="textarea-full" placeholder="Q: Question text
 A) Option A
 B) Option B
@@ -281,6 +338,18 @@ Q: Next question..." style="min-height:220px;font-family:monospace;font-size:12p
         🔍 Parse & Preview
       </button>
       <div id="bulkPreview"></div>
+
+      <style>
+        .bulk-label {
+          display: block;
+          font-size: 12px;
+          font-weight: 800;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--color-text-muted);
+          margin-bottom: 6px;
+        }
+      </style>
     `,
     actions: [
       { label: "Cancel", style: "outline", onClick: "closeModal()" },
@@ -288,35 +357,48 @@ Q: Next question..." style="min-height:220px;font-family:monospace;font-size:12p
     ],
   });
 
-  setTimeout(() => window.__loadBulkChapters(), 100);
+  // Bind custom selectors
+  setTimeout(() => {
+    document.getElementById("bulkSubjectWrap").innerHTML = buildCustomSelectHTML("bulkSubjectSel", "Choose subject");
+    bulkSubjectSel = bindCustomSelect(
+      "bulkSubjectSel",
+      currentSubjects.map(s => ({ value: s.id, label: s.name })),
+      loadBulkChapters,
+      currentSubjects[0].id
+    );
+
+    loadBulkChapters(currentSubjects[0].id);
+  }, 100);
 }
 
-window.__loadBulkChapters = async function () {
-  const subjId = parseInt(document.getElementById("bulkSubject").value);
-  const chapSel = document.getElementById("bulkChapter");
-  chapSel.innerHTML = `<option>Loading...</option>`;
+async function loadBulkChapters(subjectId) {
+  const wrap = document.getElementById("bulkChapterWrap");
+  if (!wrap) return;
 
   try {
-    const fullSubject = await AdminAPI.getSubject(subjId);
-    currentChapters = [];
+    const fullSubject = await AdminAPI.getSubject(subjectId);
+    const chapters = [];
     (fullSubject.sections || []).forEach(sec => {
-      (sec.chapters || []).forEach(ch => currentChapters.push(ch));
+      (sec.chapters || []).forEach(ch => {
+        chapters.push({ value: ch.id, label: ch.name, group: sec.name });
+      });
     });
 
-    if (currentChapters.length === 0) {
-      chapSel.innerHTML = `<option value="">No chapters</option>`;
+    currentChapters = chapters;
+
+    if (chapters.length === 0) {
+      wrap.innerHTML = `<div style="font-size:12px;color:var(--color-danger);padding:10px">No chapters</div>`;
       return;
     }
 
-    chapSel.innerHTML = currentChapters.map(c =>
-      `<option value="${c.id}">${escapeHtml(c.name)}</option>`
-    ).join("");
+    wrap.innerHTML = buildCustomSelectHTML("bulkChapterSel", "Choose chapter");
+    bulkChapterSel = bindCustomSelect("bulkChapterSel", chapters, null, chapters[0].value);
   } catch (e) {
-    chapSel.innerHTML = `<option>Error</option>`;
+    wrap.innerHTML = `<div style="font-size:12px;color:var(--color-danger);padding:10px">Error</div>`;
   }
-};
+}
 
-// Parse bulk text
+// Parse
 window.__parseBulk = function () {
   const text = document.getElementById("bulkText").value.trim();
   if (!text) {
@@ -337,32 +419,22 @@ window.__parseBulk = function () {
 
       lines.forEach(line => {
         let m;
-        if ((m = line.match(/^Q:\s*(.+)/i))) {
-          q.question = m[1].trim();
-        } else if ((m = line.match(/^A[\)\.]\s*(.+)/i))) {
-          q.options.A = m[1].trim(); optionCount++;
-        } else if ((m = line.match(/^B[\)\.]\s*(.+)/i))) {
-          q.options.B = m[1].trim(); optionCount++;
-        } else if ((m = line.match(/^C[\)\.]\s*(.+)/i))) {
-          q.options.C = m[1].trim(); optionCount++;
-        } else if ((m = line.match(/^D[\)\.]\s*(.+)/i))) {
-          q.options.D = m[1].trim(); optionCount++;
-        } else if ((m = line.match(/^Correct:\s*(.+)/i))) {
-          q.correct = m[1].trim().toUpperCase();
-        } else if ((m = line.match(/^Difficulty:\s*(.+)/i))) {
+        if ((m = line.match(/^Q:\s*(.+)/i))) q.question = m[1].trim();
+        else if ((m = line.match(/^A[\)\.]\s*(.+)/i))) { q.options.A = m[1].trim(); optionCount++; }
+        else if ((m = line.match(/^B[\)\.]\s*(.+)/i))) { q.options.B = m[1].trim(); optionCount++; }
+        else if ((m = line.match(/^C[\)\.]\s*(.+)/i))) { q.options.C = m[1].trim(); optionCount++; }
+        else if ((m = line.match(/^D[\)\.]\s*(.+)/i))) { q.options.D = m[1].trim(); optionCount++; }
+        else if ((m = line.match(/^Correct:\s*(.+)/i))) q.correct = m[1].trim().toUpperCase();
+        else if ((m = line.match(/^Difficulty:\s*(.+)/i))) {
           const d = m[1].trim().toLowerCase();
           if (["easy", "hard"].includes(d)) q.difficulty = d;
-        } else if ((m = line.match(/^Explanation:\s*(.+)/i))) {
-          q.explanation = m[1].trim();
         }
+        else if ((m = line.match(/^Explanation:\s*(.+)/i))) q.explanation = m[1].trim();
       });
 
-      // Validate
       if (!q.question) throw new Error("Missing Q:");
-      if (optionCount !== 4) throw new Error(`Expected 4 options (A-D), got ${optionCount}`);
-      if (!q.correct || !["A", "B", "C", "D"].includes(q.correct)) {
-        throw new Error("Invalid or missing 'Correct'");
-      }
+      if (optionCount !== 4) throw new Error(`Need 4 options, got ${optionCount}`);
+      if (!q.correct || !["A", "B", "C", "D"].includes(q.correct)) throw new Error("Invalid Correct");
 
       parsed.push(q);
     } catch (e) {
@@ -391,9 +463,7 @@ window.__parseBulk = function () {
 
     ${parsed.slice(0, 5).map((q, i) => `
       <div class="info-card" style="margin-bottom:8px">
-        <div style="font-size:13px;font-weight:700;line-height:1.5;margin-bottom:6px">
-          ${i + 1}. ${escapeHtml(q.question)}
-        </div>
+        <div style="font-size:13px;font-weight:700;line-height:1.5;margin-bottom:6px">${i + 1}. ${escapeHtml(q.question)}</div>
         <div style="font-size:11px;color:var(--color-text-muted);line-height:1.5">
           A) ${escapeHtml(q.options.A)}<br>
           B) ${escapeHtml(q.options.B)}<br>
@@ -406,38 +476,31 @@ window.__parseBulk = function () {
       </div>
     `).join("")}
 
-    ${parsed.length > 5 ? `
-      <div style="text-align:center;padding:8px;font-size:12px;color:var(--color-text-muted);font-weight:600">
-        ... and ${parsed.length - 5} more
-      </div>
-    ` : ""}
+    ${parsed.length > 5 ? `<div style="text-align:center;padding:8px;font-size:12px;color:var(--color-text-muted);font-weight:600">... and ${parsed.length - 5} more</div>` : ""}
   `;
 
-  if (parsed.length > 0) {
-    showToast(`Parsed ${parsed.length} questions`, "success");
-  }
+  if (parsed.length > 0) showToast(`Parsed ${parsed.length} questions`, "success");
 };
 
-// Bulk import handler
+// Import All
 window.__doBulkImport = async function () {
   if (!parsedQuestions || parsedQuestions.length === 0) {
     showToast("Click 'Parse & Preview' first", "error");
     return;
   }
 
-  const subjectId = parseInt(document.getElementById("bulkSubject").value);
-  const chapterId = parseInt(document.getElementById("bulkChapter").value);
+  const subjectId = bulkSubjectSel ? parseInt(bulkSubjectSel.getValue()) : null;
+  const chapterId = bulkChapterSel ? parseInt(bulkChapterSel.getValue()) : null;
 
   if (!chapterId) {
     showToast("Select a chapter", "error");
     return;
   }
 
-  // Get the button and disable
   const importBtn = document.querySelector(".modal-actions .btn-primary");
   if (importBtn) {
     importBtn.disabled = true;
-    importBtn.textContent = `Importing ${parsedQuestions.length}...`;
+    importBtn.textContent = `Importing 0/${parsedQuestions.length}...`;
   }
 
   let created = 0;
@@ -463,28 +526,20 @@ window.__doBulkImport = async function () {
         ],
       });
       created++;
-
-      // Update button
-      if (importBtn) {
-        importBtn.textContent = `Importing ${created}/${parsedQuestions.length}...`;
-      }
+      if (importBtn) importBtn.textContent = `Importing ${created}/${parsedQuestions.length}...`;
     } catch (e) {
       failed++;
       errors.push(`Q${i + 1}: ${e.message}`);
     }
   }
 
-  // Done
   if (importBtn) {
     importBtn.disabled = false;
     importBtn.textContent = "Import All";
   }
 
-  if (created > 0) {
-    showToast(`✅ ${created} imported, ${failed} failed`, "success", 4000);
-  } else {
-    showToast(`❌ Import failed`, "error", 4000);
-  }
+  if (created > 0) showToast(`✅ ${created} imported, ${failed} failed`, "success", 4000);
+  else showToast(`❌ Import failed`, "error", 4000);
 
   if (failed === 0) {
     closeModal();
@@ -492,17 +547,14 @@ window.__doBulkImport = async function () {
   } else {
     document.getElementById("bulkPreview").innerHTML = `
       <div class="info-card" style="background:var(--color-danger-bg);border:none">
-        <div style="font-size:13px;font-weight:800;color:var(--color-danger);margin-bottom:8px">Import failed</div>
+        <div style="font-size:13px;font-weight:800;color:var(--color-danger);margin-bottom:8px">${created} imported, ${failed} failed</div>
         ${errors.slice(0, 10).map(e => `<div style="font-size:11px;color:var(--color-danger)">⚠️ ${escapeHtml(e)}</div>`).join("")}
       </div>
     `;
   }
 };
 
-// ============================================================
-// DELETE
-// ============================================================
-
+// Delete
 function deleteQuestion(id) {
   showModal({
     title: "Delete Question?",
@@ -523,10 +575,7 @@ window.__doDeleteQ = async function (id) {
   } catch (error) { showToast(error.message, "error"); }
 };
 
-// ============================================================
-// HELPERS
-// ============================================================
-
+// Helpers
 function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
