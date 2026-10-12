@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM ENGINE — Real API + Robust KaTeX
+// EXAM ENGINE — Real API (KaTeX temporarily disabled)
 // ============================================================
 
 let state = {
@@ -47,27 +47,19 @@ let state = {
     document.getElementById("examSubtitle").textContent =
       `${state.questions.length} Q • ${Math.floor(state.remainingSec / 60)} min`;
 
-    waitForKaTeX(() => {
-      renderQuestion();
-      updateTimer();
-      startTimer();
-      openQuestionTiming();
-    });
+    console.log("Starting render...");
+    renderQuestion();
+    updateTimer();
+    startTimer();
+    openQuestionTiming();
+    console.log("Render complete!");
 
   } catch (e) {
     console.error("Exam init error:", e);
-    showToast("Failed to load exam", "error");
-    setTimeout(() => (window.location.href = "exam-start.html"), 2000);
+    showToast("Failed to load exam: " + e.message, "error", 5000);
+    setTimeout(() => (window.location.href = "exam-start.html"), 3000);
   }
 })();
-
-function waitForKaTeX(callback, attempts = 0) {
-  if (typeof renderMathInElement === "function" || attempts > 20) {
-    callback();
-  } else {
-    setTimeout(() => waitForKaTeX(callback, attempts + 1), 50);
-  }
-}
 
 // ============================================================
 // RENDER
@@ -93,8 +85,7 @@ function renderQuestion() {
   document.getElementById("qChapter").textContent = `Ch ${q.chapter_id}`;
 
   const qTextEl = document.getElementById("qText");
-  qTextEl.textContent = q.question_text;
-  renderMathIn(qTextEl);
+  qTextEl.textContent = q.question_text || "No question text";
 
   const optsEl = document.getElementById("optionsList");
   optsEl.innerHTML = "";
@@ -106,7 +97,6 @@ function renderQuestion() {
       <div class="option-label">${opt.option_label}</div>
       <div class="option-text">${escapeHtml(opt.option_text)}</div>
     `;
-    renderMathIn(div);
     div.onclick = () => selectOption(opt.option_label);
     optsEl.appendChild(div);
   });
@@ -264,7 +254,10 @@ function togglePalette(force) {
 const timerEl = document.getElementById("timer");
 
 function updateTimer() {
-  if (!timerEl) return;
+  if (!timerEl) {
+    console.warn("Timer element not found");
+    return;
+  }
   const mins = Math.floor(state.remainingSec / 60);
   const secs = state.remainingSec % 60;
   timerEl.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
@@ -389,27 +382,10 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// KaTeX disabled — placeholder
 function renderMathIn(element) {
-  if (!element) return;
-
-  if (typeof renderMathInElement !== "function") {
-    setTimeout(() => renderMathIn(element), 100);
-    return;
-  }
-
-  try {
-    renderMathInElement(element, {
-      delimiters: [
-        { left: "$$", right: "$$", display: true },
-        { left: "$", right: "$", display: false },
-        { left: "\\(", right: "\\)", display: false },
-        { left: "\\[", right: "\\]", display: true },
-      ],
-      throwOnError: false,
-    });
-  } catch (e) {
-    console.error("KaTeX render error:", e);
-  }
+  // Temporarily disabled
+  return;
 }
 
 window.prevQuestion = prevQuestion;
