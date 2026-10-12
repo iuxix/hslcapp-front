@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM ENGINE — Real API (KaTeX temporarily disabled)
+// EXAM ENGINE — Real API (Fixed timerEl order)
 // ============================================================
 
 let state = {
@@ -12,10 +12,17 @@ let state = {
   currentOpenTQId: null,
 };
 
+// ✅ timerEl defined at top — before any function uses it
+let timerEl = null;
+
 (function () {
   console.log("exam.js loaded");
 
   if (!requireLogin()) return;
+
+  // Grab timer element FIRST
+  timerEl = document.getElementById("timer");
+  console.log("Timer element:", timerEl ? "found" : "NOT FOUND");
 
   const testData = localStorage.getItem("currentTestData");
   if (!testData) {
@@ -251,19 +258,21 @@ function togglePalette(force) {
 // TIMER
 // ============================================================
 
-const timerEl = document.getElementById("timer");
-
 function updateTimer() {
-  if (!timerEl) {
+  // Re-query each time — safe
+  const el = timerEl || document.getElementById("timer");
+  if (!el) {
     console.warn("Timer element not found");
     return;
   }
+  timerEl = el;
+
   const mins = Math.floor(state.remainingSec / 60);
   const secs = state.remainingSec % 60;
-  timerEl.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-  if (state.remainingSec <= 60) timerEl.className = "timer danger";
-  else if (state.remainingSec <= 300) timerEl.className = "timer warning";
-  else timerEl.className = "timer";
+  el.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  if (state.remainingSec <= 60) el.className = "timer danger";
+  else if (state.remainingSec <= 300) el.className = "timer warning";
+  else el.className = "timer";
 }
 
 function startTimer() {
@@ -384,7 +393,6 @@ function escapeHtml(text) {
 
 // KaTeX disabled — placeholder
 function renderMathIn(element) {
-  // Temporarily disabled
   return;
 }
 
