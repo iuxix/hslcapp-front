@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM ENGINE — Real API + KaTeX
+// EXAM ENGINE — Real API + Robust KaTeX
 // ============================================================
 
 let state = {
@@ -47,10 +47,12 @@ let state = {
     document.getElementById("examSubtitle").textContent =
       `${state.questions.length} Q • ${Math.floor(state.remainingSec / 60)} min`;
 
-    renderQuestion();
-    updateTimer();
-    startTimer();
-    openQuestionTiming();
+    waitForKaTeX(() => {
+      renderQuestion();
+      updateTimer();
+      startTimer();
+      openQuestionTiming();
+    });
 
   } catch (e) {
     console.error("Exam init error:", e);
@@ -59,8 +61,16 @@ let state = {
   }
 })();
 
+function waitForKaTeX(callback, attempts = 0) {
+  if (typeof renderMathInElement === "function" || attempts > 20) {
+    callback();
+  } else {
+    setTimeout(() => waitForKaTeX(callback, attempts + 1), 50);
+  }
+}
+
 // ============================================================
-// RENDER — with KaTeX
+// RENDER
 // ============================================================
 
 function renderQuestion() {
@@ -379,15 +389,14 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// ============================================================
-// KATEX — Math rendering
-// ============================================================
-
 function renderMathIn(element) {
+  if (!element) return;
+
   if (typeof renderMathInElement !== "function") {
-    console.warn("KaTeX not loaded yet");
+    setTimeout(() => renderMathIn(element), 100);
     return;
   }
+
   try {
     renderMathInElement(element, {
       delimiters: [
