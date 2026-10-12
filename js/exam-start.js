@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM START — 4 Types: Full, Chapter, HOTS, Theory, PYQ
+// EXAM START — Full, Chapter, HOTS, Theory, PYQ (No AI)
 // ============================================================
 
 let state = {
@@ -34,16 +34,16 @@ async function loadSubjectsAndRender() {
 }
 
 // ============================================================
-// EXAM TYPES — Full, Chapter, HOTS, Theory, PYQ
+// EXAM TYPES
 // ============================================================
 
 function renderExamTypes() {
   const types = [
     { id: "full", icon: "📝", title: "Full Test", sub: "All chapters, mixed", bg: "#EEF2FF" },
     { id: "chapter", icon: "📖", title: "Chapter Test", sub: "Pick specific chapters", bg: "#CCFBF1" },
-    { id: "hots", icon: "💡", title: "HOTS", sub: "Higher order thinking", bg: "#FEF3C7", disabled: true },
-    { id: "theory", icon: "📚", title: "Theory Test", sub: "Long answers", bg: "#F3E8FF", disabled: true },
-    { id: "pyq", icon: "📜", title: "PYQ", sub: "Previous year questions", bg: "#FCE7F3", disabled: true },
+    { id: "hots", icon: "💡", title: "HOTS", sub: "Coming soon", bg: "#FEF3C7", disabled: true },
+    { id: "theory", icon: "📚", title: "Theory Test", sub: "Coming soon", bg: "#F3E8FF", disabled: true },
+    { id: "pyq", icon: "📜", title: "PYQ", sub: "Coming soon", bg: "#FCE7F3", disabled: true },
   ];
 
   const grid = document.getElementById("examTypeGrid");
@@ -80,10 +80,6 @@ function selectExamType(type) {
   showSubjectSection();
   updateFooter();
 }
-
-// ============================================================
-// SUBJECTS
-// ============================================================
 
 function showSubjectSection() {
   document.getElementById("section2").style.display = "block";
@@ -189,10 +185,6 @@ async function selectSubject(subjectId, clickedCard) {
   }
 }
 
-// ============================================================
-// DETAILS
-// ============================================================
-
 function showDetailsSectionSkeleton() {
   document.getElementById("section3").style.display = "block";
 
@@ -265,10 +257,6 @@ function toggleChapter(chapterId, checked) {
   updateFooter();
 }
 
-// ============================================================
-// DIFFICULTY & COUNT
-// ============================================================
-
 window.selectDifficulty = function (btn) {
   document.querySelectorAll("#difficultyChips .chip").forEach((c) => c.classList.remove("active"));
   btn.classList.add("active");
@@ -283,10 +271,6 @@ window.selectCount = function (btn) {
   updateFooter();
 };
 
-// ============================================================
-// STEPPER
-// ============================================================
-
 function updateStepper(step) {
   document.querySelectorAll(".step").forEach((s) => {
     const num = parseInt(s.dataset.step);
@@ -298,10 +282,6 @@ function updateStepper(step) {
     line.classList.toggle("done", i < step - 1);
   });
 }
-
-// ============================================================
-// FOOTER
-// ============================================================
 
 function updateFooter() {
   const footer = document.getElementById("footerCta");
@@ -327,10 +307,6 @@ function highlightSection(sectionId) {
   section.classList.add("section-highlight");
   setTimeout(() => section.classList.remove("section-highlight"), 1600);
 }
-
-// ============================================================
-// BEGIN EXAM
-// ============================================================
 
 window.beginExam = async function () {
   if (!state.examType) { highlightSection("section1"); showToast("Select exam type", "error"); return; }
