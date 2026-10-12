@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM ENGINE — Real API (Fixed Timer + Submit)
+// EXAM ENGINE — Real API + KaTeX
 // ============================================================
 
 let state = {
@@ -42,22 +42,14 @@ let state = {
 
     const expiresAt = new Date(parsed.expires_at).getTime();
     state.remainingSec = Math.max(0, Math.floor((expiresAt - Date.now()) / 1000));
-    console.log("Test:", state.testId, "Q:", state.questions.length, "Sec:", state.remainingSec);
 
-    // Update header
-    const titleEl = document.getElementById("examTitle");
-    const subtitleEl = document.getElementById("examSubtitle");
-    if (titleEl) titleEl.textContent = `Test #${state.testId}`;
-    if (subtitleEl) subtitleEl.textContent = `${state.questions.length} Q • ${Math.floor(state.remainingSec / 60)} min`;
+    document.getElementById("examTitle").textContent = `Test #${state.testId}`;
+    document.getElementById("examSubtitle").textContent =
+      `${state.questions.length} Q • ${Math.floor(state.remainingSec / 60)} min`;
 
-    // Render first question
     renderQuestion();
-
-    // Start timer
     updateTimer();
     startTimer();
-
-    // Timing event
     openQuestionTiming();
 
   } catch (e) {
@@ -68,39 +60,7 @@ let state = {
 })();
 
 // ============================================================
-// TIMER — Fixed
-// ============================================================
-
-function updateTimer() {
-  const timerEl = document.getElementById("timer");
-  if (!timerEl) {
-    console.warn("Timer element not found");
-    return;
-  }
-  const mins = Math.floor(state.remainingSec / 60);
-  const secs = state.remainingSec % 60;
-  timerEl.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
-  timerEl.classList.remove("warning", "danger");
-  if (state.remainingSec <= 60) timerEl.classList.add("danger");
-  else if (state.remainingSec <= 300) timerEl.classList.add("warning");
-}
-
-function startTimer() {
-  if (state.timerInterval) clearInterval(state.timerInterval);
-  state.timerInterval = setInterval(() => {
-    if (state.submitted) return;
-    state.remainingSec--;
-    if (state.remainingSec < 0) state.remainingSec = 0;
-    updateTimer();
-    if (state.remainingSec <= 0) {
-      clearInterval(state.timerInterval);
-      submitTest(true);
-    }
-  }, 1000);
-}
-
-// ============================================================
-// RENDER
+// RENDER — with KaTeX
 // ============================================================
 
 function renderQuestion() {
@@ -116,30 +76,30 @@ function renderQuestion() {
     card.style.animation = "";
   }
 
-  const qNumEl = document.getElementById("qNumber");
-  const qDiffEl = document.getElementById("qDifficulty");
-  const qChapEl = document.getElementById("qChapter");
+  document.getElementById("qNumber").textContent =
+    `Question ${state.currentIndex + 1} of ${state.questions.length}`;
+  document.getElementById("qDifficulty").textContent =
+    q.difficulty ? q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1) : "Easy";
+  document.getElementById("qChapter").textContent = `Ch ${q.chapter_id}`;
+
   const qTextEl = document.getElementById("qText");
+  qTextEl.textContent = q.question_text;
+  renderMathIn(qTextEl);
+
   const optsEl = document.getElementById("optionsList");
+  optsEl.innerHTML = "";
 
-  if (qNumEl) qNumEl.textContent = `Question ${state.currentIndex + 1} of ${state.questions.length}`;
-  if (qDiffEl) qDiffEl.textContent = q.difficulty ? q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1) : "Easy";
-  if (qChapEl) qChapEl.textContent = `Ch ${q.chapter_id}`;
-  if (qTextEl) qTextEl.textContent = q.question_text;
-
-  if (optsEl) {
-    optsEl.innerHTML = "";
-    (q.options || []).forEach((opt) => {
-      const div = document.createElement("div");
-      div.className = "option" + (q.selectedOption === opt.option_label ? " selected" : "");
-      div.innerHTML = `
-        <div class="option-label">${opt.option_label}</div>
-        <div class="option-text">${escapeHtml(opt.option_text)}</div>
-      `;
-      div.onclick = () => selectOption(opt.option_label);
-      optsEl.appendChild(div);
-    });
-  }
+  (q.options || []).forEach((opt) => {
+    const div = document.createElement("div");
+    div.className = "option" + (q.selectedOption === opt.option_label ? " selected" : "");
+    div.innerHTML = `
+      <div class="option-label">${opt.option_label}</div>
+      <div class="option-text">${escapeHtml(opt.option_text)}</div>
+    `;
+    renderMathIn(div);
+    div.onclick = () => selectOption(opt.option_label);
+    optsEl.appendChild(div);
+  });
 
   const markBtn = document.getElementById("markBtn");
   if (markBtn) {
@@ -152,10 +112,9 @@ function renderQuestion() {
     }
   }
 
-  const prevBtn = document.getElementById("prevBtn");
-  const nextBtn = document.getElementById("nextBtn");
-  if (prevBtn) prevBtn.disabled = state.currentIndex === 0;
-  if (nextBtn) nextBtn.textContent = state.currentIndex === state.questions.length - 1 ? "Review ✓" : "Next →";
+  document.getElementById("prevBtn").disabled = state.currentIndex === 0;
+  document.getElementById("nextBtn").textContent =
+    state.currentIndex === state.questions.length - 1 ? "Review ✓" : "Next →";
 
   renderPalette();
 }
@@ -289,6 +248,34 @@ function togglePalette(force) {
 }
 
 // ============================================================
+// TIMER
+// ============================================================
+
+const timerEl = document.getElementById("timer");
+
+function updateTimer() {
+  if (!timerEl) return;
+  const mins = Math.floor(state.remainingSec / 60);
+  const secs = state.remainingSec % 60;
+  timerEl.textContent = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
+  if (state.remainingSec <= 60) timerEl.className = "timer danger";
+  else if (state.remainingSec <= 300) timerEl.className = "timer warning";
+  else timerEl.className = "timer";
+}
+
+function startTimer() {
+  state.timerInterval = setInterval(() => {
+    if (state.submitted) return;
+    state.remainingSec--;
+    updateTimer();
+    if (state.remainingSec <= 0) {
+      clearInterval(state.timerInterval);
+      submitTest(true);
+    }
+  }, 1000);
+}
+
+// ============================================================
 // SUBMIT
 // ============================================================
 
@@ -392,6 +379,30 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+// ============================================================
+// KATEX — Math rendering
+// ============================================================
+
+function renderMathIn(element) {
+  if (typeof renderMathInElement !== "function") {
+    console.warn("KaTeX not loaded yet");
+    return;
+  }
+  try {
+    renderMathInElement(element, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      throwOnError: false,
+    });
+  } catch (e) {
+    console.error("KaTeX render error:", e);
+  }
+}
+
 window.prevQuestion = prevQuestion;
 window.nextQuestion = nextQuestion;
 window.toggleMark = toggleMark;
@@ -399,3 +410,4 @@ window.clearAnswer = clearAnswer;
 window.confirmSubmit = confirmSubmit;
 window.confirmExit = confirmExit;
 window.togglePalette = togglePalette;
+window.renderMathIn = renderMathIn;
