@@ -1,14 +1,9 @@
 // ============================================================
-// ADMIN — Questions Management (Custom Selectors)
+// ADMIN — Questions Management + KaTeX
 // ============================================================
 
 let currentSubjects = [];
 let currentChapters = [];
-
-let subjectSelector = null;
-let chapterSelector = null;
-let correctSelector = null;
-let difficultySelector = null;
 
 (function () {
   if (!requireAdmin()) return;
@@ -57,7 +52,7 @@ async function loadQuestions() {
         <div class="admin-empty">
           <div class="admin-empty-icon">❓</div>
           <div class="admin-empty-title">No questions yet</div>
-          <div class="admin-empty-text">Click "+ Add" to create your first question</div>
+          <div class="admin-empty-text">Click "+ Add" to create one</div>
         </div>`;
       return;
     }
@@ -68,6 +63,7 @@ async function loadQuestions() {
           <div class="admin-question-tags">
             <span class="badge badge-${q.difficulty === 'easy' ? 'success' : 'danger'}">${q.difficulty}</span>
             <span class="badge badge-muted">${q.source}</span>
+            <span class="badge badge-muted">Ch ${q.chapter_id}</span>
           </div>
           <button class="admin-btn-icon danger" onclick="deleteQuestion(${q.id})">✕</button>
         </div>
@@ -77,6 +73,11 @@ async function loadQuestions() {
         </div>
       </div>
     `).join("");
+
+    // Render math
+    listEl.querySelectorAll(".admin-question-text").forEach((el) => {
+      renderMathIn(el);
+    });
   } catch (error) {
     listEl.innerHTML = `
       <div class="admin-empty">
@@ -107,47 +108,43 @@ async function openCreateQuestion() {
     title: "Add Question",
     customContent: `
       <div style="margin-bottom:10px">
-        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Subject *</label>
-        ${buildCustomSelectHTML("qSubjectSelect", "Choose subject")}
+        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Subject</label>
+        <select id="qSubject" class="select-full" onchange="window.__loadChapters()">
+          ${currentSubjects.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
+        </select>
       </div>
       <div style="margin-bottom:10px">
-        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Chapter *</label>
-        ${buildCustomSelectHTML("qChapterSelect", "Choose chapter")}
+        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Chapter</label>
+        <select id="qChapter" class="select-full"><option>Loading...</option></select>
       </div>
       <div style="margin-bottom:10px">
-        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Question *</label>
-        <textarea id="qText" class="textarea-full" placeholder="Type question..." style="min-height:70px"></textarea>
+        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Question</label>
+        <textarea id="qText" class="textarea-full" placeholder="Question text... use $x^2$ for math" style="min-height:70px"></textarea>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div><label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">A</label><input type="text" id="qA" class="input-full" /></div>
+        <div><label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">B</label><input type="text" id="qB" class="input-full" /></div>
+        <div><label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">C</label><input type="text" id="qC" class="input-full" /></div>
+        <div><label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">D</label><input type="text" id="qD" class="input-full" /></div>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
         <div>
-          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">A</label>
-          <input type="text" id="qA" class="input-full" />
+          <label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">Correct</label>
+          <select id="qCorrect" class="select-full">
+            <option value="A">A</option><option value="B">B</option>
+            <option value="C">C</option><option value="D">D</option>
+          </select>
         </div>
         <div>
-          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">B</label>
-          <input type="text" id="qB" class="input-full" />
-        </div>
-        <div>
-          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">C</label>
-          <input type="text" id="qC" class="input-full" />
-        </div>
-        <div>
-          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">D</label>
-          <input type="text" id="qD" class="input-full" />
-        </div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div>
-          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Correct *</label>
-          ${buildCustomSelectHTML("qCorrectSelect", "Answer")}
-        </div>
-        <div>
-          <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Difficulty *</label>
-          ${buildCustomSelectHTML("qDifficultySelect", "Difficulty")}
+          <label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">Difficulty</label>
+          <select id="qDiff" class="select-full">
+            <option value="easy">Easy</option>
+            <option value="hard">Hard</option>
+          </select>
         </div>
       </div>
       <div style="margin-bottom:10px">
-        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:0.05em;color:var(--color-text-muted);margin-bottom:6px">Explanation (optional)</label>
+        <label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">Explanation (optional)</label>
         <textarea id="qExplanation" class="textarea-full" placeholder="Explanation..." style="min-height:50px"></textarea>
       </div>
     `,
@@ -157,88 +154,48 @@ async function openCreateQuestion() {
     ],
   });
 
-  // Bind custom selectors
-  setTimeout(() => {
-    subjectSelector = bindCustomSelect(
-      "qSubjectSelect",
-      currentSubjects.map(s => ({ value: s.id, label: s.name })),
-      loadChaptersForSelector,
-      currentSubjects[0]?.id
-    );
-
-    correctSelector = bindCustomSelect(
-      "qCorrectSelect",
-      [
-        { value: "A", label: "A" },
-        { value: "B", label: "B" },
-        { value: "C", label: "C" },
-        { value: "D", label: "D" },
-      ],
-      null,
-      "A"
-    );
-
-    difficultySelector = bindCustomSelect(
-      "qDifficultySelect",
-      [
-        { value: "easy", label: "Easy" },
-        { value: "hard", label: "Hard" },
-      ],
-      null,
-      "easy"
-    );
-
-    // Load chapters for first subject
-    loadChaptersForSelector(currentSubjects[0]?.id);
-  }, 100);
+  setTimeout(() => window.__loadChapters(), 100);
 }
 
-async function loadChaptersForSelector(subjectId) {
-  if (!subjectId) return;
+window.__loadChapters = async function () {
+  const subjId = parseInt(document.getElementById("qSubject").value);
+  const chapSel = document.getElementById("qChapter");
+  chapSel.innerHTML = `<option>Loading...</option>`;
 
   try {
-    const fullSubject = await AdminAPI.getSubject(subjectId);
-    const chapters = [];
+    const fullSubject = await AdminAPI.getSubject(subjId);
+    currentChapters = [];
     (fullSubject.sections || []).forEach(sec => {
-      (sec.chapters || []).forEach(ch => {
-        chapters.push({ value: ch.id, label: ch.name, group: sec.name });
-      });
+      (sec.chapters || []).forEach(ch => currentChapters.push(ch));
     });
 
-    currentChapters = chapters;
-
-    if (chapters.length === 0) {
-      chapterSelector = bindCustomSelect("qChapterSelect", [], null, null);
-      showToast("No chapters in this subject", "error");
+    if (currentChapters.length === 0) {
+      chapSel.innerHTML = `<option value="">No chapters</option>`;
       return;
     }
 
-    chapterSelector = bindCustomSelect(
-      "qChapterSelect",
-      chapters,
-      null,
-      chapters[0].value
-    );
+    chapSel.innerHTML = currentChapters.map(c =>
+      `<option value="${c.id}">${escapeHtml(c.name)}</option>`
+    ).join("");
   } catch (e) {
-    console.error(e);
-    showToast("Failed to load chapters", "error");
+    chapSel.innerHTML = `<option>Error</option>`;
   }
-}
+};
 
 window.__doCreateQuestion = async function () {
-  const subjectId = subjectSelector ? subjectSelector.getValue() : null;
-  const chapterId = chapterSelector ? chapterSelector.getValue() : null;
+  const subjectId = parseInt(document.getElementById("qSubject").value);
+  const chapterId = parseInt(document.getElementById("qChapter").value);
   const text = document.getElementById("qText").value.trim();
   const optA = document.getElementById("qA").value.trim();
   const optB = document.getElementById("qB").value.trim();
   const optC = document.getElementById("qC").value.trim();
   const optD = document.getElementById("qD").value.trim();
-  const correct = correctSelector ? correctSelector.getValue() : "A";
-  const difficulty = difficultySelector ? difficultySelector.getValue() : "easy";
+  const correct = document.getElementById("qCorrect").value;
+  const difficulty = document.getElementById("qDiff").value;
   const explanation = document.getElementById("qExplanation").value.trim();
 
   if (!text || !optA || !optB || !optC || !optD) {
-    showToast("All question and option fields required", "error");
+    showToast("All fields required", "error");
     return;
   }
   if (!chapterId) {
@@ -248,8 +205,8 @@ window.__doCreateQuestion = async function () {
 
   try {
     await AdminAPI.createQuestion({
-      subject_id: parseInt(subjectId),
-      chapter_id: parseInt(chapterId),
+      subject_id: subjectId,
+      chapter_id: chapterId,
       question_text: text,
       correct_option: correct,
       explanation: explanation || null,
@@ -293,6 +250,37 @@ window.__doDeleteQ = async function (id) {
     setTimeout(() => { loadQuestions(); loadStats(); }, 400);
   } catch (error) { showToast(error.message, "error"); }
 };
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
+
+// ============================================================
+// KATEX
+// ============================================================
+
+function renderMathIn(element) {
+  if (typeof renderMathInElement !== "function") return;
+  try {
+    renderMathInElement(element, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      throwOnError: false,
+    });
+  } catch (e) {
+    console.error("KaTeX render error:", e);
+  }
+}
 
 window.openCreateQuestion = openCreateQuestion;
 window.loadQuestions = loadQuestions;
