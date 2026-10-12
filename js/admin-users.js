@@ -1,8 +1,6 @@
 // ============================================================
-// ADMIN — Users Management
+// ADMIN — Users Management + Reset Data
 // ============================================================
-
-let roleSelector = null;
 
 (function () {
   if (!requireAdmin()) return;
@@ -69,7 +67,7 @@ async function loadUsers() {
 }
 
 // ============================================================
-// USER MENU — Actions in modal
+// USER MENU — with Reset Data
 // ============================================================
 
 function openUserMenu(userId, username, role, isActive, isSelf) {
@@ -112,13 +110,21 @@ function openUserMenu(userId, username, role, isActive, isSelf) {
     });
   }
 
+  // ✅ NEW: Reset Data
+  options.push({
+    icon: "🔄",
+    label: "Reset Progress",
+    subtitle: "Delete all tests & analytics",
+    onClick: `window.__confirmReset(${userId}, '${escapeHtml(username)}')`,
+  });
+
   if (role !== "admin") {
     options.push({
       icon: "🗑️",
       label: "Delete User",
       subtitle: "Permanently remove",
       danger: true,
-      onClick: `window.__confirmDelete(${userId}, '${username}')`,
+      onClick: `window.__confirmDelete(${userId}, '${escapeHtml(username)}')`,
     });
   }
 
@@ -178,6 +184,69 @@ window.__activate = async function (userId) {
   }
 };
 
+// ============================================================
+// RESET DATA
+// ============================================================
+
+window.__confirmReset = function (userId, username) {
+  closeModal();
+  setTimeout(() => {
+    showModal({
+      title: "⚠️ Reset User Progress?",
+      content: `All tests, analytics, and progress for "${username}" will be DELETED. The account stays.`,
+      customContent: `
+        <div style="background:var(--color-danger-bg);padding:12px;border-radius:8px;margin-top:8px">
+          <div style="font-size:12px;color:var(--color-danger);font-weight:700;line-height:1.6">
+            ⚠️ This will delete:
+            <br>• All test attempts
+            <br>• All answers
+            <br>• All analytics data
+            <br>• All progress tracking
+            <br><br>❌ Cannot be undone.
+          </div>
+        </div>
+      `,
+      actions: [
+        { label: "Cancel", style: "outline", onClick: "closeModal()" },
+        { label: "Yes, Reset", style: "danger", onClick: `window.__doReset(${userId})` },
+      ],
+    });
+  }, 250);
+};
+
+window.__doReset = async function (userId) {
+  closeModal();
+
+  showToast("Resetting data...", "info", 1500);
+
+  try {
+    const response = await fetch(`${CONFIG.API_URL}/api/admin/users/${userId}/reset-data`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${API.getToken()}`,
+      },
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.detail || `HTTP ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    showToast(`✅ Reset complete: ${data.deleted.attempts} attempts deleted`, "success", 4000);
+    setTimeout(() => loadUsers(), 400);
+  } catch (error) {
+    console.error("Reset error:", error);
+    showToast(error.message || "Reset failed", "error", 4000);
+  }
+};
+
+// ============================================================
+// DELETE USER
+// ============================================================
+
 window.__confirmDelete = function (userId, username) {
   closeModal();
   setTimeout(() => {
@@ -204,7 +273,7 @@ window.__doDelete = async function (userId) {
 };
 
 // ============================================================
-// CREATE USER MODAL
+// CREATE USER
 // ============================================================
 
 function openCreateUserModal() {
@@ -238,7 +307,6 @@ function openCreateUserModal() {
     ],
   });
 
-  // Bind custom selector
   setTimeout(() => {
     const wrapper = document.getElementById("userRoleSelectWrapper");
     if (wrapper) {
@@ -255,6 +323,8 @@ function openCreateUserModal() {
     }
   }, 100);
 }
+
+let roleSelector = null;
 
 window.__doCreate = async function () {
   const username = document.getElementById("newUsername").value.trim();
@@ -287,6 +357,16 @@ window.__doCreate = async function () {
     showToast(error.message, "error");
   }
 };
+
+// ============================================================
+// HELPERS
+// ============================================================
+
+function escapeHtml(text) {
+  const div = document.createElement("div");
+  div.textContent = text;
+  return div.innerHTML;
+}
 
 window.openCreateUserModal = openCreateUserModal;
 window.openUserMenu = openUserMenu;
