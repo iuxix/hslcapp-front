@@ -1,5 +1,5 @@
 /* ============================================================
-   DASHBOARD + ADMIN — Full CSS
+   DASHBOARD + ADMIN — Slate Dark Header
    ============================================================ */
 
 .app-shell {
@@ -14,18 +14,19 @@
   padding-bottom: 40px;
 }
 
-/* ========== HEADER ========== */
+/* ========== STUDENT HEADER — Slate Dark ========== */
 .app-header {
-  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
   color: #fff;
   padding: var(--space-6) var(--space-5) var(--space-5);
   border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
   position: sticky;
   top: 0;
   z-index: 100;
-  box-shadow: 0 8px 24px rgba(217, 119, 6, 0.25);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.25);
 }
 
+/* ========== ADMIN HEADER ========== */
 .admin-header {
   background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
   color: #fff;
@@ -96,6 +97,7 @@
   text-transform: uppercase;
 }
 
+/* ========== STUDENT HEADER TOP ========== */
 .header-top {
   display: flex;
   justify-content: space-between;
@@ -113,7 +115,7 @@
 
 .header-greeting p {
   font-size: 13px;
-  color: rgba(255, 255, 255, 0.85);
+  color: rgba(255, 255, 255, 0.65);
   font-weight: 500;
 }
 
@@ -121,8 +123,8 @@
   width: 46px;
   height: 46px;
   border-radius: var(--radius-full);
-  background: rgba(255, 255, 255, 0.25);
-  border: 2px solid rgba(255, 255, 255, 0.4);
+  background: linear-gradient(135deg, #6366F1, #4F46E5);
+  border: 2px solid rgba(255, 255, 255, 0.2);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -131,6 +133,7 @@
   color: #fff;
   cursor: pointer;
   transition: transform 150ms ease;
+  box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
 }
 
 .header-avatar:active { transform: scale(0.95); }
@@ -142,8 +145,8 @@
 }
 
 .header-stat {
-  background: rgba(255, 255, 255, 0.18);
-  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   border-radius: var(--radius-md);
   padding: var(--space-3) var(--space-2);
   text-align: center;
@@ -160,7 +163,7 @@
 
 .header-stat .stat-label {
   font-size: 10px;
-  color: rgba(255, 255, 255, 0.9);
+  color: rgba(255, 255, 255, 0.6);
   margin-top: 3px;
   font-weight: 700;
   letter-spacing: 0.06em;
@@ -181,7 +184,6 @@
 }
 
 .section { margin-bottom: var(--space-5); }
-
 .admin-section { margin-bottom: var(--space-5); }
 
 .section-title {
@@ -448,17 +450,8 @@
 }
 
 .nav-item.active { color: var(--color-primary); }
-
-.nav-item.active .nav-icon {
-  transform: scale(1.05);
-  filter: grayscale(0);
-  opacity: 1;
-}
-
-.nav-item.active .nav-label {
-  font-weight: 800;
-  letter-spacing: 0.02em;
-}
+.nav-item.active .nav-icon { transform: scale(1.05); filter: grayscale(0); opacity: 1; }
+.nav-item.active .nav-label { font-weight: 800; letter-spacing: 0.02em; }
 
 .fab {
   width: 56px;
@@ -786,6 +779,17 @@ table tr:last-child td { border-bottom: none; }
 }
 
 .reset-data-btn:active { transform: scale(0.96); }
+
+/* ========== KATEX OVERRIDES ========== */
+.katex {
+  font-size: 1.05em !important;
+}
+
+.katex-display {
+  margin: 8px 0 !important;
+  overflow-x: auto;
+  overflow-y: hidden;
+}
 
 /* ========== DESKTOP ========== */
 @media (min-width: 900px) {
