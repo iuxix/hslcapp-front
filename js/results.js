@@ -1,6 +1,8 @@
 // ============================================================
-// RESULTS — Real API + Detailed Analysis
+// RESULTS — Real API + KaTeX + Chapter Names
 // ============================================================
+
+const chapterNameCache = {};
 
 (async function () {
   if (!requireLogin()) return;
@@ -10,10 +12,9 @@
 
   if (!testId) {
     document.getElementById("resultMain").innerHTML = `
-      <div class="admin-empty">
-        <div class="admin-empty-icon">😕</div>
-        <div class="admin-empty-title">No result found</div>
-        <div class="admin-empty-text">Go back and take a test</div>
+      <div class="empty-state">
+        <div class="empty-icon">😕</div>
+        <div class="empty-text">No result found</div>
       </div>`;
     return;
   }
@@ -24,16 +25,40 @@
   } catch (e) {
     console.error(e);
     document.getElementById("resultMain").innerHTML = `
-      <div class="admin-empty">
-        <div class="admin-empty-icon">❌</div>
-        <div class="admin-empty-title">Failed to load</div>
-        <div class="admin-empty-text">${escapeHtml(e.message)}</div>
+      <div class="empty-state">
+        <div class="empty-icon">❌</div>
+        <div class="empty-text">Failed to load: ${escapeHtml(e.message)}</div>
       </div>`;
     return;
   }
 
+  // Prefetch chapter names
+  await prefetchChapterNames(result);
+
   renderResult(result);
 })();
+
+// ============================================================
+// PREFETCH CHAPTER NAMES
+// ============================================================
+
+async function prefetchChapterNames(result) {
+  const chapterIds = [...new Set(result.questions.map(q => q.chapter_id))];
+
+  for (const chId of chapterIds) {
+    if (chapterNameCache[chId]) continue;
+    try {
+      const ch = await PublicAPI.getChapter(chId);
+      chapterNameCache[chId] = ch.name;
+    } catch (e) {
+      chapterNameCache[chId] = `Chapter ${chId}`;
+    }
+  }
+}
+
+function getChapterName(chId) {
+  return chapterNameCache[chId] || `Chapter ${chId}`;
+}
 
 // ============================================================
 // RENDER
@@ -44,18 +69,23 @@ function renderResult(r) {
   const pass = r.percentage >= 70;
   const mid = r.percentage >= 40 && r.percentage < 70;
 
-  // ========== CHAPTER STATS ==========
+  // Chapter stats with names
   const chapterStats = {};
   r.questions.forEach((q) => {
     if (!chapterStats[q.chapter_id]) {
-      chapterStats[q.chapter_id] = { correct: 0, total: 0, totalTime: 0 };
+      chapterStats[q.chapter_id] = {
+        correct: 0,
+        total: 0,
+        totalTime: 0,
+        name: getChapterName(q.chapter_id),
+      };
     }
     chapterStats[q.chapter_id].total++;
     chapterStats[q.chapter_id].totalTime += q.time_spent_seconds || 0;
     if (q.is_correct) chapterStats[q.chapter_id].correct++;
   });
 
-  // ========== DIFFICULTY STATS ==========
+  // Difficulty stats
   const diffStats = { easy: { correct: 0, total: 0 }, hard: { correct: 0, total: 0 } };
   r.questions.forEach((q) => {
     const d = q.difficulty || "easy";
@@ -65,14 +95,14 @@ function renderResult(r) {
     }
   });
 
-  // ========== TIME STATS ==========
+  // Time stats
   const times = r.questions.map((q) => q.time_spent_seconds || 0).filter((t) => t > 0);
   const avgTime = times.length > 0 ? (times.reduce((s, t) => s + t, 0) / times.length).toFixed(1) : 0;
   const maxTime = times.length > 0 ? Math.max(...times) : 0;
   const minTime = times.length > 0 ? Math.min(...times) : 0;
   const slowestQ = r.questions.find((q) => (q.time_spent_seconds || 0) === maxTime);
 
-  // ========== CLASSIFY ==========
+  // Classification
   const avgNum = parseFloat(avgTime);
   const classifications = { fastCorrect: 0, slowCorrect: 0, fastWrong: 0, slowWrong: 0, skipped: 0 };
   r.questions.forEach((q) => {
@@ -84,7 +114,6 @@ function renderResult(r) {
     else classifications.slowWrong++;
   });
 
-  // ========== RENDER ==========
   main.innerHTML = `
     <div class="score-card ${pass ? "pass" : mid ? "mid" : "fail"}">
       <div class="score-big">${r.percentage}%</div>
@@ -102,27 +131,15 @@ function renderResult(r) {
     <section class="section">
       <h3 class="section-title">⏱️ Time Analysis</h3>
       <div class="time-grid">
-        <div class="time-card success">
-          <div class="time-value">${minTime}s</div>
-          <div class="time-label">Fastest</div>
-        </div>
-        <div class="time-card accent">
-          <div class="time-value">${avgTime}s</div>
-          <div class="time-label">Average</div>
-        </div>
-        <div class="time-card danger">
-          <div class="time-value">${maxTime}s</div>
-          <div class="time-label">Longest</div>
-        </div>
-        <div class="time-card">
-          <div class="time-value">${r.avg_time_per_question.toFixed(1)}s</div>
-          <div class="time-label">Per Question</div>
-        </div>
+        <div class="time-card success"><div class="time-value">${minTime}s</div><div class="time-label">Fastest</div></div>
+        <div class="time-card accent"><div class="time-value">${avgTime}s</div><div class="time-label">Average</div></div>
+        <div class="time-card danger"><div class="time-value">${maxTime}s</div><div class="time-label">Longest</div></div>
+        <div class="time-card"><div class="time-value">${r.avg_time_per_question.toFixed(1)}s</div><div class="time-label">Per Question</div></div>
       </div>
       ${slowestQ ? `
         <div class="time-card danger" style="margin-top:12px">
           <div class="time-label" style="margin-bottom:8px">⚠️ Longest question</div>
-          <div style="font-size:13px;color:var(--color-text);line-height:1.5;font-weight:500">
+          <div class="slowest-q-text" style="font-size:13px;color:var(--color-text);line-height:1.5;font-weight:500">
             ${escapeHtml(slowestQ.question_text)}
           </div>
           <div style="font-size:11px;color:var(--color-text-muted);margin-top:6px;font-weight:600">
@@ -141,7 +158,7 @@ function renderResult(r) {
           return `
             <div class="analysis-row">
               <div class="analysis-row-left">
-                <div class="name">Chapter ${chId}</div>
+                <div class="name">${escapeHtml(c.name)}</div>
                 <div class="sub">${c.correct}/${c.total} correct · ${avgChTime}s avg</div>
                 <div class="bar-track">
                   <div class="bar-fill ${cls}" style="width:${pct}%"></div>
@@ -165,9 +182,7 @@ function renderResult(r) {
               <div class="analysis-row-left">
                 <div class="name" style="text-transform:capitalize">${d} Questions</div>
                 <div class="sub">${s.correct}/${s.total} correct</div>
-                <div class="bar-track">
-                  <div class="bar-fill ${cls}" style="width:${pct}%"></div>
-                </div>
+                <div class="bar-track"><div class="bar-fill ${cls}" style="width:${pct}%"></div></div>
               </div>
               <div class="pct ${cls}">${pct}%</div>
             </div>`;
@@ -178,26 +193,11 @@ function renderResult(r) {
     <section class="section">
       <h3 class="section-title">⚡ Speed & Accuracy</h3>
       <div class="speed-list">
-        <div class="speed-item">
-          <span class="speed-label">⚡ Fast + Correct</span>
-          <span class="speed-value good">${classifications.fastCorrect}</span>
-        </div>
-        <div class="speed-item">
-          <span class="speed-label">🐢 Slow + Correct</span>
-          <span class="speed-value muted">${classifications.slowCorrect}</span>
-        </div>
-        <div class="speed-item">
-          <span class="speed-label">⚠️ Fast + Wrong (careless)</span>
-          <span class="speed-value warn">${classifications.fastWrong}</span>
-        </div>
-        <div class="speed-item">
-          <span class="speed-label">🐌 Slow + Wrong</span>
-          <span class="speed-value bad">${classifications.slowWrong}</span>
-        </div>
-        <div class="speed-item">
-          <span class="speed-label">⬜ Skipped</span>
-          <span class="speed-value muted">${classifications.skipped}</span>
-        </div>
+        <div class="speed-item"><span class="speed-label">⚡ Fast + Correct</span><span class="speed-value good">${classifications.fastCorrect}</span></div>
+        <div class="speed-item"><span class="speed-label">🐢 Slow + Correct</span><span class="speed-value muted">${classifications.slowCorrect}</span></div>
+        <div class="speed-item"><span class="speed-label">⚠️ Fast + Wrong</span><span class="speed-value warn">${classifications.fastWrong}</span></div>
+        <div class="speed-item"><span class="speed-label">🐌 Slow + Wrong</span><span class="speed-value bad">${classifications.slowWrong}</span></div>
+        <div class="speed-item"><span class="speed-label">⬜ Skipped</span><span class="speed-value muted">${classifications.skipped}</span></div>
       </div>
     </section>
 
@@ -212,7 +212,10 @@ function renderResult(r) {
     </div>
   `;
 
-  // ========== QUESTION REVIEW ==========
+  // Render math in slowest question
+  const slowestEl = main.querySelector(".slowest-q-text");
+  if (slowestEl) renderMathIn(slowestEl);
+
   const review = document.getElementById("qReview");
   r.questions.forEach((q, i) => {
     const status = !q.selected_option ? "skipped" : q.is_correct ? "correct" : "wrong";
@@ -232,6 +235,7 @@ function renderResult(r) {
       ${!q.is_correct && q.explanation ? `<div class="review-explanation">${escapeHtml(q.explanation)}</div>` : ""}
     `;
     review.appendChild(card);
+    renderMathIn(card);
   });
 }
 
@@ -249,4 +253,25 @@ function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
+}
+
+// ============================================================
+// KATEX
+// ============================================================
+
+function renderMathIn(element) {
+  if (typeof renderMathInElement !== "function") return;
+  try {
+    renderMathInElement(element, {
+      delimiters: [
+        { left: "$$", right: "$$", display: true },
+        { left: "$", right: "$", display: false },
+        { left: "\\(", right: "\\)", display: false },
+        { left: "\\[", right: "\\]", display: true },
+      ],
+      throwOnError: false,
+    });
+  } catch (e) {
+    console.error("KaTeX render error:", e);
+  }
 }
