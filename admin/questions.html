@@ -21,14 +21,17 @@
             <p>Add & manage MCQs</p>
           </div>
         </div>
-        <button class="admin-btn admin-btn-primary" onclick="openCreateQuestion()">
-          + Add
-        </button>
       </div>
     </header>
 
     <main class="admin-main">
       <div id="statsBar" style="margin-bottom:16px"></div>
+
+      <div class="action-row" style="margin-bottom:16px">
+        <button class="btn btn-admin" onclick="openCreateQuestion()" style="flex:1">+ Single</button>
+        <button class="btn btn-primary" onclick="openBulkImport()" style="flex:2">📦 Bulk Import</button>
+      </div>
+
       <div id="questionsList"></div>
     </main>
   </div>
