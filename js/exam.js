@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM ENGINE — Real API (Fixed timerEl order)
+// EXAM ENGINE — Real API + Chapter Names
 // ============================================================
 
 let state = {
@@ -12,17 +12,15 @@ let state = {
   currentOpenTQId: null,
 };
 
-// ✅ timerEl defined at top — before any function uses it
 let timerEl = null;
+const chapterNameCache = {}; // ← NEW: chapter names cache
 
 (function () {
   console.log("exam.js loaded");
 
   if (!requireLogin()) return;
 
-  // Grab timer element FIRST
   timerEl = document.getElementById("timer");
-  console.log("Timer element:", timerEl ? "found" : "NOT FOUND");
 
   const testData = localStorage.getItem("currentTestData");
   if (!testData) {
@@ -54,6 +52,9 @@ let timerEl = null;
     document.getElementById("examSubtitle").textContent =
       `${state.questions.length} Q • ${Math.floor(state.remainingSec / 60)} min`;
 
+    // Prefetch chapter names (background)
+    prefetchChapterNames();
+
     console.log("Starting render...");
     renderQuestion();
     updateTimer();
@@ -67,6 +68,44 @@ let timerEl = null;
     setTimeout(() => (window.location.href = "exam-start.html"), 3000);
   }
 })();
+
+// ============================================================
+// PREFETCH CHAPTER NAMES — background
+// ============================================================
+
+async function prefetchChapterNames() {
+  const chapterIds = [...new Set(state.questions.map(q => q.chapter_id))];
+
+  for (const chId of chapterIds) {
+    if (chapterNameCache[chId]) continue;
+    try {
+      const ch = await PublicAPI.getChapter(chId);
+      chapterNameCache[chId] = ch.name;
+      console.log(`Chapter ${chId}: ${ch.name}`);
+
+      // Re-render current question if it's this chapter
+      const currentQ = state.questions[state.currentIndex];
+      if (currentQ && currentQ.chapter_id === chId) {
+        updateChapterLabel();
+      }
+    } catch (e) {
+      chapterNameCache[chId] = `Chapter ${chId}`;
+    }
+  }
+}
+
+function getChapterName(chId) {
+  return chapterNameCache[chId] || `Chapter ${chId}`;
+}
+
+function updateChapterLabel() {
+  const q = state.questions[state.currentIndex];
+  if (!q) return;
+  const el = document.getElementById("qChapter");
+  if (el) {
+    el.textContent = getChapterName(q.chapter_id);
+  }
+}
 
 // ============================================================
 // RENDER
@@ -89,7 +128,12 @@ function renderQuestion() {
     `Question ${state.currentIndex + 1} of ${state.questions.length}`;
   document.getElementById("qDifficulty").textContent =
     q.difficulty ? q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1) : "Easy";
-  document.getElementById("qChapter").textContent = `Ch ${q.chapter_id}`;
+
+  // Chapter name
+  const qChapterEl = document.getElementById("qChapter");
+  if (qChapterEl) {
+    qChapterEl.textContent = getChapterName(q.chapter_id);
+  }
 
   const qTextEl = document.getElementById("qText");
   qTextEl.textContent = q.question_text || "No question text";
@@ -259,12 +303,8 @@ function togglePalette(force) {
 // ============================================================
 
 function updateTimer() {
-  // Re-query each time — safe
   const el = timerEl || document.getElementById("timer");
-  if (!el) {
-    console.warn("Timer element not found");
-    return;
-  }
+  if (!el) return;
   timerEl = el;
 
   const mins = Math.floor(state.remainingSec / 60);
@@ -391,7 +431,6 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// KaTeX disabled — placeholder
 function renderMathIn(element) {
   return;
 }
