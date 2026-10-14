@@ -4,7 +4,7 @@
 
 const CONFIG = {
   // Production API URL
-  API_URL: "https://hslc.onrender.com",
+  API_URL: "https://hslc-backend-39ea71.rivendeploy.com",
 
   // Local testing ke liye ye use karo:
   // API_URL: "http://localhost:8000",
