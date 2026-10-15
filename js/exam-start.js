@@ -1,5 +1,5 @@
 // ============================================================
-// EXAM START — Full, Chapter, HOTS, Theory, PYQ (No AI)
+// EXAM START — Optimized (lightweight endpoints)
 // ============================================================
 
 let state = {
@@ -33,10 +33,6 @@ async function loadSubjectsAndRender() {
   renderExamTypes();
 }
 
-// ============================================================
-// EXAM TYPES
-// ============================================================
-
 function renderExamTypes() {
   const types = [
     { id: "full", icon: "📝", title: "Full Test", sub: "All chapters, mixed", bg: "#EEF2FF" },
@@ -56,7 +52,7 @@ function renderExamTypes() {
     card.style.position = "relative";
     card.onclick = () => {
       if (t.disabled) {
-        showToast(`${t.title} — coming in next update!`, "info", 2500);
+        showToast(`${t.title} — coming soon`, "info", 2000);
         return;
       }
       selectExamType(t.id);
@@ -144,10 +140,10 @@ async function selectSubject(subjectId, clickedCard) {
   updateFooter();
 
   try {
-    const fullSubject = await PublicAPI.getSubject(subjectId);
-    const sections = fullSubject.sections || [];
+    // ✅ Lightweight endpoint
+    const sections = await API.get(`/api/public/subjects/${subjectId}/chapters-only`);
     const chapters = [];
-    sections.forEach((sec) => {
+    (sections || []).forEach((sec) => {
       (sec.chapters || []).forEach((ch) => {
         chapters.push({ ...ch, sectionName: sec.name });
       });
@@ -176,18 +172,11 @@ async function selectSubject(subjectId, clickedCard) {
       const subject = state.subjects.find((s) => s.id === subjectId);
       if (meta && subject) meta.textContent = subject.code;
     }
-
-    document.getElementById("section3").innerHTML = `
-      <div class="admin-empty">
-        <div class="admin-empty-icon">❌</div>
-        <div class="admin-empty-title">Failed to load chapters</div>
-      </div>`;
   }
 }
 
 function showDetailsSectionSkeleton() {
   document.getElementById("section3").style.display = "block";
-
   if (state.examType === "chapter") {
     document.getElementById("chapterBlock").style.display = "block";
     document.getElementById("chapterSelectWrapper").innerHTML = `
@@ -202,7 +191,6 @@ function showDetailsSectionSkeleton() {
 
 function showDetailsSection() {
   document.getElementById("section3").style.display = "block";
-
   if (state.examType === "chapter") {
     document.getElementById("chapterBlock").style.display = "block";
     renderChapterSelector();
@@ -219,7 +207,6 @@ function renderChapterSelector() {
       <div class="admin-empty">
         <div class="admin-empty-icon">📄</div>
         <div class="admin-empty-title">No chapters</div>
-        <div class="admin-empty-text">No chapters in this subject yet</div>
       </div>`;
     return;
   }
@@ -357,7 +344,6 @@ window.beginExam = async function () {
       }
 
       const data = await response.json();
-
       localStorage.setItem("currentTestId", data.test_id);
       localStorage.setItem("currentTestData", JSON.stringify(data));
       window.location.href = "exam.html";
@@ -365,24 +351,15 @@ window.beginExam = async function () {
 
     } catch (error) {
       console.error("Begin exam error:", error);
-
-      const isRetryable = error.name === "AbortError" || 
-                          error.message.includes("Network") || 
-                          error.message.includes("fetch") ||
-                          error.message.includes("Load failed");
-
+      const isRetryable = error.name === "AbortError" || error.message.includes("Network") || error.message.includes("fetch");
       if (isRetryable && retries < maxRetries) {
         retries++;
-        showToast(`Backend waking up... retry ${retries}/${maxRetries}`, "info", 2000);
+        showToast(`Retrying... ${retries}/${maxRetries}`, "info", 2000);
         await new Promise((r) => setTimeout(r, 3000));
         return attemptStart();
       }
-
       showToast(error.message || "Failed to start exam", "error", 4000);
-      if (btn) {
-        btn.disabled = false;
-        btn.textContent = "Begin →";
-      }
+      if (btn) { btn.disabled = false; btn.textContent = "Begin →"; }
     }
   }
 
