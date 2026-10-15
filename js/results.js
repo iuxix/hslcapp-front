@@ -1,8 +1,13 @@
 // ============================================================
-// RESULTS — Real API + KaTeX + Chapter Names
+// RESULTS — Real API + Pagination for Question Review
 // ============================================================
 
 const chapterNameCache = {};
+let resultState = {
+  allQuestions: [],
+  shownCount: 0,
+  pageSize: 10,
+};
 
 (async function () {
   if (!requireLogin()) return;
@@ -32,8 +37,8 @@ const chapterNameCache = {};
     return;
   }
 
-  // Prefetch chapter names
-  await prefetchChapterNames(result);
+  // Prefetch chapter names (background, non-blocking)
+  prefetchChapterNames(result);
 
   renderResult(result);
 })();
@@ -50,6 +55,8 @@ async function prefetchChapterNames(result) {
     try {
       const ch = await PublicAPI.getChapter(chId);
       chapterNameCache[chId] = ch.name;
+      // Re-render chapter section silently
+      updateChapterNames();
     } catch (e) {
       chapterNameCache[chId] = `Chapter ${chId}`;
     }
@@ -58,6 +65,13 @@ async function prefetchChapterNames(result) {
 
 function getChapterName(chId) {
   return chapterNameCache[chId] || `Chapter ${chId}`;
+}
+
+function updateChapterNames() {
+  document.querySelectorAll("[data-chapter-name]").forEach((el) => {
+    const chId = parseInt(el.dataset.chapterName);
+    el.textContent = getChapterName(chId);
+  });
 }
 
 // ============================================================
@@ -69,16 +83,11 @@ function renderResult(r) {
   const pass = r.percentage >= 70;
   const mid = r.percentage >= 40 && r.percentage < 70;
 
-  // Chapter stats with names
+  // Chapter stats
   const chapterStats = {};
   r.questions.forEach((q) => {
     if (!chapterStats[q.chapter_id]) {
-      chapterStats[q.chapter_id] = {
-        correct: 0,
-        total: 0,
-        totalTime: 0,
-        name: getChapterName(q.chapter_id),
-      };
+      chapterStats[q.chapter_id] = { correct: 0, total: 0, totalTime: 0 };
     }
     chapterStats[q.chapter_id].total++;
     chapterStats[q.chapter_id].totalTime += q.time_spent_seconds || 0;
@@ -114,6 +123,10 @@ function renderResult(r) {
     else classifications.slowWrong++;
   });
 
+  // Setup state for pagination
+  resultState.allQuestions = r.questions;
+  resultState.shownCount = 0;
+
   main.innerHTML = `
     <div class="score-card ${pass ? "pass" : mid ? "mid" : "fail"}">
       <div class="score-big">${r.percentage}%</div>
@@ -139,7 +152,7 @@ function renderResult(r) {
       ${slowestQ ? `
         <div class="time-card danger" style="margin-top:12px">
           <div class="time-label" style="margin-bottom:8px">⚠️ Longest question</div>
-          <div class="slowest-q-text" style="font-size:13px;color:var(--color-text);line-height:1.5;font-weight:500">
+          <div style="font-size:13px;color:var(--color-text);line-height:1.5;font-weight:500">
             ${escapeHtml(slowestQ.question_text)}
           </div>
           <div style="font-size:11px;color:var(--color-text-muted);margin-top:6px;font-weight:600">
@@ -158,7 +171,7 @@ function renderResult(r) {
           return `
             <div class="analysis-row">
               <div class="analysis-row-left">
-                <div class="name">${escapeHtml(c.name)}</div>
+                <div class="name" data-chapter-name="${chId}">${getChapterName(parseInt(chId))}</div>
                 <div class="sub">${c.correct}/${c.total} correct · ${avgChTime}s avg</div>
                 <div class="bar-track">
                   <div class="bar-fill ${cls}" style="width:${pct}%"></div>
@@ -202,8 +215,9 @@ function renderResult(r) {
     </section>
 
     <section class="section">
-      <h3 class="section-title">📝 Question Review</h3>
+      <h3 class="section-title">📝 Question Review (${r.questions.length})</h3>
       <div id="qReview"></div>
+      <div id="qReviewLoadMore" style="text-align:center;margin-top:12px"></div>
     </section>
 
     <div class="action-row">
@@ -212,12 +226,29 @@ function renderResult(r) {
     </div>
   `;
 
-  // Render math in slowest question
-  const slowestEl = main.querySelector(".slowest-q-text");
-  if (slowestEl) renderMathIn(slowestEl);
+  // First batch of reviews
+  loadMoreReviews();
+}
 
+// ============================================================
+// PAGINATED QUESTION REVIEW
+// ============================================================
+
+function loadMoreReviews() {
   const review = document.getElementById("qReview");
-  r.questions.forEach((q, i) => {
+  const loadMoreWrap = document.getElementById("qReviewLoadMore");
+  if (!review || !loadMoreWrap) return;
+
+  const all = resultState.allQuestions;
+  const start = resultState.shownCount;
+  const end = Math.min(start + resultState.pageSize, all.length);
+
+  // Compute avg time for slow indicator
+  const times = all.map((q) => q.time_spent_seconds || 0).filter((t) => t > 0);
+  const avgNum = times.length > 0 ? times.reduce((s, t) => s + t, 0) / times.length : 0;
+
+  for (let i = start; i < end; i++) {
+    const q = all[i];
     const status = !q.selected_option ? "skipped" : q.is_correct ? "correct" : "wrong";
     const statusText = status === "correct" ? "✓ Correct" : status === "wrong" ? "✗ Wrong" : "— Skipped";
     const slow = (q.time_spent_seconds || 0) > avgNum * 1.5;
@@ -235,8 +266,23 @@ function renderResult(r) {
       ${!q.is_correct && q.explanation ? `<div class="review-explanation">${escapeHtml(q.explanation)}</div>` : ""}
     `;
     review.appendChild(card);
-    renderMathIn(card);
-  });
+  }
+
+  resultState.shownCount = end;
+
+  // Update Load More button
+  if (end < all.length) {
+    const remaining = all.length - end;
+    loadMoreWrap.innerHTML = `
+      <button class="btn btn-outline btn-block" onclick="loadMoreReviews()">
+        Load More (${end}/${all.length}) — ${remaining} remaining
+      </button>`;
+  } else {
+    loadMoreWrap.innerHTML = `
+      <div style="font-size:12px;color:var(--color-text-muted);font-weight:600;padding:8px">
+        — All ${all.length} questions shown —
+      </div>`;
+  }
 }
 
 // ============================================================
@@ -255,23 +301,4 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-// ============================================================
-// KATEX
-// ============================================================
-
-function renderMathIn(element) {
-  if (typeof renderMathInElement !== "function") return;
-  try {
-    renderMathInElement(element, {
-      delimiters: [
-        { left: "$$", right: "$$", display: true },
-        { left: "$", right: "$", display: false },
-        { left: "\\(", right: "\\)", display: false },
-        { left: "\\[", right: "\\]", display: true },
-      ],
-      throwOnError: false,
-    });
-  } catch (e) {
-    console.error("KaTeX render error:", e);
-  }
-}
+window.loadMoreReviews = loadMoreReviews;
