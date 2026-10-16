@@ -41,6 +41,7 @@
     </header>
 
     <main class="admin-main">
+      <!-- Users -->
       <section class="admin-section">
         <button class="action-box action-box-primary action-box-large" onclick="goTo('users.html')">
           <div class="box-icon">👥</div>
@@ -52,6 +53,7 @@
         </button>
       </section>
 
+      <!-- Curriculum + Questions -->
       <section class="admin-section">
         <div class="box-grid-2">
           <button class="action-box action-box-teal" onclick="goTo('curriculum.html')">
@@ -67,15 +69,20 @@
         </div>
       </section>
 
+      <!-- Stats + Material -->
       <section class="admin-section">
-        <button class="action-box action-box-purple action-box-medium" onclick="goTo('material.html')">
-          <div class="box-icon">📖</div>
-          <div class="box-content">
-            <div class="box-title">Study Material</div>
-            <div class="box-sub">Chapter content</div>
-          </div>
-          <div class="box-arrow">→</div>
-        </button>
+        <div class="box-grid-2">
+          <button class="action-box action-box-rose" onclick="goTo('questions-stats.html')">
+            <div class="box-icon">📊</div>
+            <div class="box-title">Question Stats</div>
+            <div class="box-sub">Subject-wise count</div>
+          </button>
+          <button class="action-box action-box-purple" onclick="goTo('material.html')">
+            <div class="box-icon">📖</div>
+            <div class="box-title">Material</div>
+            <div class="box-sub">Study content</div>
+          </button>
+        </div>
       </section>
     </main>
   </div>
