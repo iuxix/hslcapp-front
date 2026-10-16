@@ -1,24 +1,24 @@
 // ============================================================
-// ADMIN — Questions Management (Custom Selectors)
+// ADMIN — Questions (Search + Edit + Delete + Bulk)
 // ============================================================
 
 let currentSubjects = [];
 let currentChapters = [];
 let parsedQuestions = [];
+let allQuestionsList = [];
+let editingQuestionId = null;
 
-let singleSubjectSel = null;
-let singleChapterSel = null;
-let singleCorrectSel = null;
-let singleDiffSel = null;
-
-let bulkSubjectSel = null;
-let bulkChapterSel = null;
+let roleSelector = null;
 
 (function () {
   if (!requireAdmin()) return;
   loadQuestions();
   loadStats();
 })();
+
+// ============================================================
+// STATS BAR
+// ============================================================
 
 async function loadStats() {
   try {
@@ -40,10 +40,12 @@ async function loadStats() {
         </div>
       </div>
     `;
-  } catch (e) {
-    console.error(e);
-  }
+  } catch (e) { console.error(e); }
 }
+
+// ============================================================
+// LOAD & RENDER QUESTIONS
+// ============================================================
 
 async function loadQuestions() {
   const listEl = document.getElementById("questionsList");
@@ -54,38 +56,9 @@ async function loadQuestions() {
     </div>`;
 
   try {
-    const questions = await AdminAPI.listQuestions({ limit: 50 });
-
-    if (questions.length === 0) {
-      listEl.innerHTML = `
-        <div class="admin-empty">
-          <div class="admin-empty-icon">❓</div>
-          <div class="admin-empty-title">No questions yet</div>
-          <div class="admin-empty-text">Click "+ Single" or "📦 Bulk Import"</div>
-        </div>`;
-      return;
-    }
-
-    listEl.innerHTML = questions.map(q => `
-      <div class="admin-question-card">
-        <div class="admin-question-header">
-          <div class="admin-question-tags">
-            <span class="badge badge-${q.difficulty === 'easy' ? 'success' : 'danger'}">${q.difficulty}</span>
-            <span class="badge badge-muted">${q.source}</span>
-            <span class="badge badge-muted">Ch ${q.chapter_id}</span>
-          </div>
-          <button class="admin-btn-icon danger" onclick="deleteQuestion(${q.id})">✕</button>
-        </div>
-        <div class="admin-question-text">${escapeHtml(q.question_text)}</div>
-        <div class="admin-question-answer">
-          ✓ Correct: <strong>${q.correct_option}</strong>
-        </div>
-      </div>
-    `).join("");
-
-    listEl.querySelectorAll(".admin-question-text").forEach((el) => {
-      renderMathIn(el);
-    });
+    const questions = await AdminAPI.listQuestions({ limit: 200 });
+    allQuestionsList = questions || [];
+    renderQuestionsList(allQuestionsList);
   } catch (error) {
     listEl.innerHTML = `
       <div class="admin-empty">
@@ -96,8 +69,237 @@ async function loadQuestions() {
   }
 }
 
+function renderQuestionsList(questions) {
+  const listEl = document.getElementById("questionsList");
+
+  if (questions.length === 0) {
+    listEl.innerHTML = `
+      <div class="admin-empty">
+        <div class="admin-empty-icon">❓</div>
+        <div class="admin-empty-title">No questions found</div>
+        <div class="admin-empty-text">Try different search</div>
+      </div>`;
+    return;
+  }
+
+  listEl.innerHTML = questions.map(q => `
+    <div class="admin-question-card">
+      <div class="admin-question-header">
+        <div class="admin-question-tags">
+          <span class="badge badge-${q.difficulty === 'easy' ? 'success' : 'danger'}">${q.difficulty}</span>
+          <span class="badge badge-muted">${q.source}</span>
+          <span class="badge badge-muted">Ch ${q.chapter_id}</span>
+        </div>
+        <div style="display:flex;gap:6px">
+          <button class="admin-btn-icon" onclick="editQuestion(${q.id})" title="Edit">✎</button>
+          <button class="admin-btn-icon danger" onclick="deleteQuestion(${q.id})" title="Delete">✕</button>
+        </div>
+      </div>
+      <div class="admin-question-text">${escapeHtml(q.question_text)}</div>
+      <div class="admin-question-answer">
+        ✓ Correct: <strong>${q.correct_option}</strong>
+      </div>
+    </div>
+  `).join("");
+}
+
 // ============================================================
-// SINGLE QUESTION — Custom Selectors
+// SEARCH
+// ============================================================
+
+window.filterQuestionsBySearch = function () {
+  const searchInput = document.getElementById("questionSearch");
+  if (!searchInput) return;
+  const term = searchInput.value.trim().toLowerCase();
+  if (!term) { renderQuestionsList(allQuestionsList); return; }
+
+  const filtered = allQuestionsList.filter((q) =>
+    q.question_text.toLowerCase().includes(term)
+  );
+  renderQuestionsList(filtered);
+};
+
+// ============================================================
+// EDIT QUESTION
+// ============================================================
+
+async function editQuestion(id) {
+  try {
+    currentSubjects = await AdminAPI.listSubjects();
+    const question = allQuestionsList.find((q) => q.id === id);
+    if (!question) { showToast("Question not found", "error"); return; }
+    editingQuestionId = id;
+
+    const subject = currentSubjects.find((s) => s.id === question.subject_id);
+
+    let chapters = [];
+    if (subject) {
+      const fullSubject = await AdminAPI.getSubject(subject.id);
+      (fullSubject.sections || []).forEach((sec) => {
+        (sec.chapters || []).forEach((ch) => {
+          chapters.push({ id: ch.id, name: ch.name, sectionName: sec.name });
+        });
+      });
+    }
+
+    const options = {};
+    question.options.forEach((o) => { options[o.option_label] = o.option_text; });
+
+    showModal({
+      title: "Edit Question",
+      customContent: `
+        <style>
+          .edit-label {
+            display: block;
+            font-size: 12px;
+            font-weight: 800;
+            text-transform: uppercase;
+            color: var(--color-text-muted);
+            margin-bottom: 6px;
+          }
+        </style>
+
+        <div style="margin-bottom:10px">
+          <label class="edit-label">Subject</label>
+          <select id="editSubject" class="select-full" onchange="window.__loadEditChapters(this.value)">
+            ${currentSubjects.map((s) => `<option value="${s.id}" ${s.id === question.subject_id ? "selected" : ""}>${escapeHtml(s.name)}</option>`).join("")}
+          </select>
+        </div>
+        <div style="margin-bottom:10px">
+          <label class="edit-label">Chapter</label>
+          <select id="editChapter" class="select-full">
+            ${chapters.map((c) => `<option value="${c.id}" ${c.id === question.chapter_id ? "selected" : ""}>${escapeHtml(c.name)}</option>`).join("")}
+          </select>
+        </div>
+        <div style="margin-bottom:10px">
+          <label class="edit-label">Question</label>
+          <textarea id="editText" class="textarea-full" style="min-height:70px">${escapeHtml(question.question_text)}</textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div><label class="edit-label">A</label><input type="text" id="editA" class="input-full" value="${escapeHtml(options.A || '')}" /></div>
+          <div><label class="edit-label">B</label><input type="text" id="editB" class="input-full" value="${escapeHtml(options.B || '')}" /></div>
+          <div><label class="edit-label">C</label><input type="text" id="editC" class="input-full" value="${escapeHtml(options.C || '')}" /></div>
+          <div><label class="edit-label">D</label><input type="text" id="editD" class="input-full" value="${escapeHtml(options.D || '')}" /></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+          <div>
+            <label class="edit-label">Correct</label>
+            <select id="editCorrect" class="select-full">
+              ${["A","B","C","D"].map((l) => `<option value="${l}" ${l === question.correct_option ? "selected" : ""}>${l}</option>`).join("")}
+            </select>
+          </div>
+          <div>
+            <label class="edit-label">Difficulty</label>
+            <select id="editDiff" class="select-full">
+              <option value="easy" ${question.difficulty === "easy" ? "selected" : ""}>Easy</option>
+              <option value="hard" ${question.difficulty === "hard" ? "selected" : ""}>Hard</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:10px">
+          <label class="edit-label">Explanation</label>
+          <textarea id="editExplanation" class="textarea-full" style="min-height:50px">${escapeHtml(question.explanation || '')}</textarea>
+        </div>
+      `,
+      actions: [
+        { label: "Cancel", style: "outline", onClick: "closeModal()" },
+        { label: "Save", style: "primary", onClick: "window.__doEditSave()" },
+      ],
+    });
+  } catch (e) {
+    console.error(e);
+    showToast("Failed to load for edit", "error");
+  }
+}
+
+window.__loadEditChapters = async function (subjectId) {
+  try {
+    const fullSubject = await AdminAPI.getSubject(subjectId);
+    const sel = document.getElementById("editChapter");
+    let html = "";
+    (fullSubject.sections || []).forEach((sec) => {
+      html += `<optgroup label="${escapeHtml(sec.name)}">`;
+      (sec.chapters || []).forEach((ch) => {
+        html += `<option value="${ch.id}">${escapeHtml(ch.name)}</option>`;
+      });
+      html += `</optgroup>`;
+    });
+    sel.innerHTML = html;
+  } catch (e) { console.error(e); }
+};
+
+window.__doEditSave = async function () {
+  if (!editingQuestionId) return;
+
+  const subjectId = parseInt(document.getElementById("editSubject").value);
+  const chapterId = parseInt(document.getElementById("editChapter").value);
+  const text = document.getElementById("editText").value.trim();
+  const optA = document.getElementById("editA").value.trim();
+  const optB = document.getElementById("editB").value.trim();
+  const optC = document.getElementById("editC").value.trim();
+  const optD = document.getElementById("editD").value.trim();
+  const correct = document.getElementById("editCorrect").value;
+  const difficulty = document.getElementById("editDiff").value;
+  const explanation = document.getElementById("editExplanation").value.trim();
+
+  if (!text || !optA || !optB || !optC || !optD) {
+    showToast("All fields required", "error");
+    return;
+  }
+
+  try {
+    await API.put(`/api/admin/questions/${editingQuestionId}/full`, {
+      subject_id: subjectId,
+      chapter_id: chapterId,
+      section_id: null,
+      topic_id: null,
+      question_text: text,
+      correct_option: correct,
+      explanation: explanation || null,
+      difficulty,
+      question_type: "mcq",
+      options: [
+        { option_label: "A", option_text: optA },
+        { option_label: "B", option_text: optB },
+        { option_label: "C", option_text: optC },
+        { option_label: "D", option_text: optD },
+      ],
+    });
+    closeModal();
+    editingQuestionId = null;
+    showToast("Question updated!", "success");
+    setTimeout(() => loadQuestions(), 400);
+  } catch (error) {
+    showToast(error.message, "error");
+  }
+};
+
+// ============================================================
+// DELETE
+// ============================================================
+
+function deleteQuestion(id) {
+  showModal({
+    title: "Delete Question?",
+    content: "This action cannot be undone.",
+    actions: [
+      { label: "Cancel", style: "outline", onClick: "closeModal()" },
+      { label: "Delete", style: "danger", onClick: `window.__doDeleteQ(${id})` },
+    ],
+  });
+}
+
+window.__doDeleteQ = async function (id) {
+  closeModal();
+  try {
+    await AdminAPI.deleteQuestion(id);
+    showToast("Question deleted", "success");
+    setTimeout(() => loadQuestions(), 400);
+  } catch (error) { showToast(error.message, "error"); }
+};
+
+// ============================================================
+// SINGLE QUESTION ADD
 // ============================================================
 
 async function openCreateQuestion() {
@@ -115,50 +317,40 @@ async function openCreateQuestion() {
   showModal({
     title: "Add Single Question",
     customContent: `
-      <div style="margin-bottom:12px">
-        <label class="modal-label">Subject</label>
-        <div id="singleSubjectWrap"></div>
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px">Subject</label>
+        <select id="qSubject" class="select-full" onchange="window.__loadChapters()">
+          ${currentSubjects.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
+        </select>
       </div>
-      <div style="margin-bottom:12px">
-        <label class="modal-label">Chapter</label>
-        <div id="singleChapterWrap"></div>
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px">Chapter</label>
+        <select id="qChapter" class="select-full"><option>Loading...</option></select>
       </div>
-      <div style="margin-bottom:12px">
-        <label class="modal-label">Question</label>
+      <div style="margin-bottom:10px">
+        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px">Question</label>
         <textarea id="qText" class="textarea-full" placeholder="Question... use $x^2$ for math" style="min-height:70px"></textarea>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
-        <div><label class="modal-label">A</label><input type="text" id="qA" class="input-full" /></div>
-        <div><label class="modal-label">B</label><input type="text" id="qB" class="input-full" /></div>
-        <div><label class="modal-label">C</label><input type="text" id="qC" class="input-full" /></div>
-        <div><label class="modal-label">D</label><input type="text" id="qD" class="input-full" /></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div><label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">A</label><input type="text" id="qA" class="input-full" /></div>
+        <div><label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">B</label><input type="text" id="qB" class="input-full" /></div>
+        <div><label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">C</label><input type="text" id="qC" class="input-full" /></div>
+        <div><label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">D</label><input type="text" id="qD" class="input-full" /></div>
       </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
         <div>
-          <label class="modal-label">Correct</label>
-          <div id="singleCorrectWrap"></div>
+          <label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">Correct</label>
+          <select id="qCorrect" class="select-full"><option>A</option><option>B</option><option>C</option><option>D</option></select>
         </div>
         <div>
-          <label class="modal-label">Difficulty</label>
-          <div id="singleDiffWrap"></div>
+          <label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">Difficulty</label>
+          <select id="qDiff" class="select-full"><option value="easy">Easy</option><option value="hard">Hard</option></select>
         </div>
       </div>
       <div style="margin-bottom:10px">
-        <label class="modal-label">Explanation (optional)</label>
+        <label style="font-size:12px;font-weight:800;display:block;margin-bottom:6px">Explanation</label>
         <textarea id="qExplanation" class="textarea-full" style="min-height:50px"></textarea>
       </div>
-
-      <style>
-        .modal-label {
-          display: block;
-          font-size: 12px;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: var(--color-text-muted);
-          margin-bottom: 6px;
-        }
-      </style>
     `,
     actions: [
       { label: "Cancel", style: "outline", onClick: "closeModal()" },
@@ -166,85 +358,44 @@ async function openCreateQuestion() {
     ],
   });
 
-  // Bind custom selectors after DOM ready
-  setTimeout(() => {
-    // Subject
-    document.getElementById("singleSubjectWrap").innerHTML = buildCustomSelectHTML("singleSubjectSel", "Choose subject");
-    singleSubjectSel = bindCustomSelect(
-      "singleSubjectSel",
-      currentSubjects.map(s => ({ value: s.id, label: s.name })),
-      loadSingleChapters,
-      currentSubjects[0].id
-    );
-
-    // Correct
-    document.getElementById("singleCorrectWrap").innerHTML = buildCustomSelectHTML("singleCorrectSel", "A/B/C/D");
-    singleCorrectSel = bindCustomSelect(
-      "singleCorrectSel",
-      [
-        { value: "A", label: "A" },
-        { value: "B", label: "B" },
-        { value: "C", label: "C" },
-        { value: "D", label: "D" },
-      ],
-      null,
-      "A"
-    );
-
-    // Difficulty
-    document.getElementById("singleDiffWrap").innerHTML = buildCustomSelectHTML("singleDiffSel", "Difficulty");
-    singleDiffSel = bindCustomSelect(
-      "singleDiffSel",
-      [
-        { value: "easy", label: "🌱 Easy" },
-        { value: "hard", label: "🔥 Hard" },
-      ],
-      null,
-      "easy"
-    );
-
-    // Load chapters for first subject
-    loadSingleChapters(currentSubjects[0].id);
-  }, 100);
+  setTimeout(() => window.__loadChapters(), 100);
 }
 
-async function loadSingleChapters(subjectId) {
-  const wrap = document.getElementById("singleChapterWrap");
-  if (!wrap) return;
+window.__loadChapters = async function () {
+  const subjId = parseInt(document.getElementById("qSubject").value);
+  const chapSel = document.getElementById("qChapter");
+  chapSel.innerHTML = `<option>Loading...</option>`;
 
   try {
-    const fullSubject = await AdminAPI.getSubject(subjectId);
-    const chapters = [];
+    const fullSubject = await AdminAPI.getSubject(subjId);
+    currentChapters = [];
     (fullSubject.sections || []).forEach(sec => {
-      (sec.chapters || []).forEach(ch => {
-        chapters.push({ value: ch.id, label: ch.name, group: sec.name });
-      });
+      (sec.chapters || []).forEach(ch => currentChapters.push(ch));
     });
 
-    currentChapters = chapters;
-
-    if (chapters.length === 0) {
-      wrap.innerHTML = `<div style="font-size:12px;color:var(--color-danger);padding:10px">No chapters — add first</div>`;
+    if (currentChapters.length === 0) {
+      chapSel.innerHTML = `<option value="">No chapters</option>`;
       return;
     }
 
-    wrap.innerHTML = buildCustomSelectHTML("singleChapterSel", "Choose chapter");
-    singleChapterSel = bindCustomSelect("singleChapterSel", chapters, null, chapters[0].value);
+    chapSel.innerHTML = currentChapters.map(c =>
+      `<option value="${c.id}">${escapeHtml(c.name)}</option>`
+    ).join("");
   } catch (e) {
-    wrap.innerHTML = `<div style="font-size:12px;color:var(--color-danger);padding:10px">Error loading chapters</div>`;
+    chapSel.innerHTML = `<option>Error</option>`;
   }
-}
+};
 
 window.__doCreateQuestion = async function () {
-  const subjectId = singleSubjectSel ? parseInt(singleSubjectSel.getValue()) : null;
-  const chapterId = singleChapterSel ? parseInt(singleChapterSel.getValue()) : null;
+  const subjectId = parseInt(document.getElementById("qSubject").value);
+  const chapterId = parseInt(document.getElementById("qChapter").value);
   const text = document.getElementById("qText").value.trim();
   const optA = document.getElementById("qA").value.trim();
   const optB = document.getElementById("qB").value.trim();
   const optC = document.getElementById("qC").value.trim();
   const optD = document.getElementById("qD").value.trim();
-  const correct = singleCorrectSel ? singleCorrectSel.getValue() : "A";
-  const difficulty = singleDiffSel ? singleDiffSel.getValue() : "easy";
+  const correct = document.getElementById("qCorrect").value;
+  const difficulty = document.getElementById("qDiff").value;
   const explanation = document.getElementById("qExplanation").value.trim();
 
   if (!text || !optA || !optB || !optC || !optD) {
@@ -281,7 +432,7 @@ window.__doCreateQuestion = async function () {
 };
 
 // ============================================================
-// BULK IMPORT — Custom Selectors
+// BULK IMPORT
 // ============================================================
 
 async function openBulkImport() {
@@ -302,15 +453,17 @@ async function openBulkImport() {
     title: "📦 Bulk Import MCQ",
     customContent: `
       <div style="margin-bottom:12px">
-        <label class="bulk-label">Subject</label>
-        <div id="bulkSubjectWrap"></div>
+        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px">Subject *</label>
+        <select id="bulkSubject" class="select-full" onchange="window.__loadBulkChapters()">
+          ${currentSubjects.map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`).join("")}
+        </select>
       </div>
       <div style="margin-bottom:12px">
-        <label class="bulk-label">Chapter</label>
-        <div id="bulkChapterWrap"></div>
+        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px">Chapter *</label>
+        <select id="bulkChapter" class="select-full"><option>Loading...</option></select>
       </div>
       <div style="margin-bottom:12px">
-        <label class="bulk-label">Paste Questions</label>
+        <label style="display:block;font-size:12px;font-weight:800;text-transform:uppercase;color:var(--color-text-muted);margin-bottom:6px">Paste Questions *</label>
         <textarea id="bulkText" class="textarea-full" placeholder="Q: Question text
 A) Option A
 B) Option B
@@ -338,18 +491,6 @@ Q: Next question..." style="min-height:220px;font-family:monospace;font-size:12p
         🔍 Parse & Preview
       </button>
       <div id="bulkPreview"></div>
-
-      <style>
-        .bulk-label {
-          display: block;
-          font-size: 12px;
-          font-weight: 800;
-          text-transform: uppercase;
-          letter-spacing: 0.05em;
-          color: var(--color-text-muted);
-          margin-bottom: 6px;
-        }
-      </style>
     `,
     actions: [
       { label: "Cancel", style: "outline", onClick: "closeModal()" },
@@ -357,48 +498,34 @@ Q: Next question..." style="min-height:220px;font-family:monospace;font-size:12p
     ],
   });
 
-  // Bind custom selectors
-  setTimeout(() => {
-    document.getElementById("bulkSubjectWrap").innerHTML = buildCustomSelectHTML("bulkSubjectSel", "Choose subject");
-    bulkSubjectSel = bindCustomSelect(
-      "bulkSubjectSel",
-      currentSubjects.map(s => ({ value: s.id, label: s.name })),
-      loadBulkChapters,
-      currentSubjects[0].id
-    );
-
-    loadBulkChapters(currentSubjects[0].id);
-  }, 100);
+  setTimeout(() => window.__loadBulkChapters(), 100);
 }
 
-async function loadBulkChapters(subjectId) {
-  const wrap = document.getElementById("bulkChapterWrap");
-  if (!wrap) return;
+window.__loadBulkChapters = async function () {
+  const subjId = parseInt(document.getElementById("bulkSubject").value);
+  const chapSel = document.getElementById("bulkChapter");
+  chapSel.innerHTML = `<option>Loading...</option>`;
 
   try {
-    const fullSubject = await AdminAPI.getSubject(subjectId);
-    const chapters = [];
+    const fullSubject = await AdminAPI.getSubject(subjId);
+    currentChapters = [];
     (fullSubject.sections || []).forEach(sec => {
-      (sec.chapters || []).forEach(ch => {
-        chapters.push({ value: ch.id, label: ch.name, group: sec.name });
-      });
+      (sec.chapters || []).forEach(ch => currentChapters.push(ch));
     });
 
-    currentChapters = chapters;
-
-    if (chapters.length === 0) {
-      wrap.innerHTML = `<div style="font-size:12px;color:var(--color-danger);padding:10px">No chapters</div>`;
+    if (currentChapters.length === 0) {
+      chapSel.innerHTML = `<option value="">No chapters</option>`;
       return;
     }
 
-    wrap.innerHTML = buildCustomSelectHTML("bulkChapterSel", "Choose chapter");
-    bulkChapterSel = bindCustomSelect("bulkChapterSel", chapters, null, chapters[0].value);
+    chapSel.innerHTML = currentChapters.map(c =>
+      `<option value="${c.id}">${escapeHtml(c.name)}</option>`
+    ).join("");
   } catch (e) {
-    wrap.innerHTML = `<div style="font-size:12px;color:var(--color-danger);padding:10px">Error</div>`;
+    chapSel.innerHTML = `<option>Error</option>`;
   }
-}
+};
 
-// Parse
 window.__parseBulk = function () {
   const text = document.getElementById("bulkText").value.trim();
   if (!text) {
@@ -482,15 +609,14 @@ window.__parseBulk = function () {
   if (parsed.length > 0) showToast(`Parsed ${parsed.length} questions`, "success");
 };
 
-// Import All
 window.__doBulkImport = async function () {
   if (!parsedQuestions || parsedQuestions.length === 0) {
     showToast("Click 'Parse & Preview' first", "error");
     return;
   }
 
-  const subjectId = bulkSubjectSel ? parseInt(bulkSubjectSel.getValue()) : null;
-  const chapterId = bulkChapterSel ? parseInt(bulkChapterSel.getValue()) : null;
+  const subjectId = parseInt(document.getElementById("bulkSubject").value);
+  const chapterId = parseInt(document.getElementById("bulkChapter").value);
 
   if (!chapterId) {
     showToast("Select a chapter", "error");
@@ -554,52 +680,18 @@ window.__doBulkImport = async function () {
   }
 };
 
-// Delete
-function deleteQuestion(id) {
-  showModal({
-    title: "Delete Question?",
-    content: "This action cannot be undone.",
-    actions: [
-      { label: "Cancel", style: "outline", onClick: "closeModal()" },
-      { label: "Delete", style: "danger", onClick: `window.__doDeleteQ(${id})` },
-    ],
-  });
-}
+// ============================================================
+// HELPERS
+// ============================================================
 
-window.__doDeleteQ = async function (id) {
-  closeModal();
-  try {
-    await AdminAPI.deleteQuestion(id);
-    showToast("Question deleted", "success");
-    setTimeout(() => { loadQuestions(); loadStats(); }, 400);
-  } catch (error) { showToast(error.message, "error"); }
-};
-
-// Helpers
 function escapeHtml(text) {
   const div = document.createElement("div");
   div.textContent = text;
   return div.innerHTML;
 }
 
-function renderMathIn(element) {
-  if (typeof renderMathInElement !== "function") return;
-  try {
-    renderMathInElement(element, {
-      delimiters: [
-        { left: "$$", right: "$$", display: true },
-        { left: "$", right: "$", display: false },
-        { left: "\\(", right: "\\)", display: false },
-        { left: "\\[", right: "\\]", display: true },
-      ],
-      throwOnError: false,
-    });
-  } catch (e) {
-    console.error("KaTeX render error:", e);
-  }
-}
-
 window.openCreateQuestion = openCreateQuestion;
 window.openBulkImport = openBulkImport;
 window.loadQuestions = loadQuestions;
 window.deleteQuestion = deleteQuestion;
+window.editQuestion = editQuestion;
