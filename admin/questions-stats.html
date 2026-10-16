@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Question Stats — Admin</title>
+  <link rel="stylesheet" href="../css/base.css" />
+  <link rel="stylesheet" href="../css/components.css" />
+  <link rel="stylesheet" href="../css/dashboard.css" />
+  <link rel="stylesheet" href="../css/admin.css" />
+</head>
+<body>
+  <div class="admin-shell">
+    <header class="admin-header">
+      <div class="admin-header-top">
+        <div class="admin-header-title">
+          <button class="admin-back-btn" onclick="window.location.href='dashboard.html'">←</button>
+          <div>
+            <h2>Question Stats</h2>
+            <p>Subject & chapter-wise count</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="admin-main" id="statsMain">
+      <div class="admin-loading">
+        <div class="admin-spinner"></div>
+        <div class="admin-loading-text">Loading stats...</div>
+      </div>
+    </main>
+  </div>
+
+  <script src="../js/config.js"></script>
+  <script src="../js/api.js"></script>
+  <script src="../js/toast.js"></script>
+  <script src="../js/modal.js"></script>
+  <script src="../js/auth.js"></script>
+  <script>
+    (async function () {
+      if (!requireAdmin()) return;
+      const main = document.getElementById("statsMain");
+      try {
+        const data = await API.get("/api/admin/questions-count");
+        main.innerHTML = `
+          <div class="stat-grid" style="margin-bottom:24px">
+            <div class="stat-box"><div class="v">${data.total_questions}</div><div class="l">Total Questions</div></div>
+            <div class="stat-box"><div class="v">${data.subjects.length}</div><div class="l">Subjects</div></div>
+          </div>
+          ${data.subjects.map((subj) => `
+            <section class="section">
+              <h3 class="section-title">${escapeHtml(subj.subject_name)} — ${subj.total_questions} Q</h3>
+              <div class="info-card">
+                ${subj.chapters.map((ch) => `
+                  <div class="analysis-row">
+                    <div>
+                      <div class="name">${escapeHtml(ch.chapter_name)}</div>
+                      <div class="sub">${escapeHtml(ch.section_name)}</div>
+                    </div>
+                    <span class="badge ${ch.count === 0 ? 'badge-danger' : ch.count < 5 ? 'badge-warning' : 'badge-success'}">
+                      ${ch.count} Q
+                    </span>
+                  </div>
+                `).join("")}
+              </div>
+            </section>
+          `).join("")}
+        `;
+      } catch (e) {
+        main.innerHTML = `
+          <div class="admin-empty">
+            <div class="admin-empty-icon">❌</div>
+            <div class="admin-empty-title">Failed</div>
+            <div class="admin-empty-text">${escapeHtml(e.message)}</div>
+          </div>`;
+      }
+    })();
+
+    function escapeHtml(t) {
+      const d = document.createElement("div");
+      d.textContent = t;
+      return d.innerHTML;
+    }
+  </script>
+</body>
+</html>
