@@ -96,5 +96,12 @@
   <script src="js/custom-select.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/exam-start.js"></script>
+  <!-- DEBUG: Eruda -->
+ <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+ <script>
+   if (window.location.hostname.includes('vercel.app') || window.location.hostname === 'localhost') {
+     eruda.init();
+   }
+</script>
 </body>
 </html>
