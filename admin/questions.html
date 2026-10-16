@@ -8,7 +8,6 @@
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/dashboard.css" />
   <link rel="stylesheet" href="../css/admin.css" />
-  <link rel="stylesheet" href="../css/custom-select.css" />
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css" />
 </head>
 <body>
@@ -19,7 +18,7 @@
           <button class="admin-back-btn" onclick="window.location.href='dashboard.html'">←</button>
           <div>
             <h2>Questions</h2>
-            <p>Add & manage MCQs</p>
+            <p>Add, search & manage MCQs</p>
           </div>
         </div>
       </div>
@@ -31,6 +30,19 @@
       <div class="action-row" style="margin-bottom:16px">
         <button class="btn btn-admin" onclick="openCreateQuestion()" style="flex:1">+ Single</button>
         <button class="btn btn-primary" onclick="openBulkImport()" style="flex:2">📦 Bulk Import</button>
+      </div>
+
+      <!-- Search Bar -->
+      <div style="position:relative;margin-bottom:16px">
+        <input
+          type="text"
+          id="questionSearch"
+          class="input-full"
+          placeholder="Search questions..."
+          oninput="filterQuestionsBySearch()"
+          style="padding-left:44px"
+        />
+        <span style="position:absolute;left:16px;top:50%;transform:translateY(-50%);font-size:16px;opacity:0.5;pointer-events:none">🔍</span>
       </div>
 
       <div id="questionsList"></div>
@@ -47,7 +59,6 @@
   <script src="../js/api.js"></script>
   <script src="../js/toast.js"></script>
   <script src="../js/modal.js"></script>
-  <script src="../js/custom-select.js"></script>
   <script src="../js/auth.js"></script>
   <script src="../js/admin-questions.js"></script>
 </body>
