@@ -8,6 +8,7 @@
   <link rel="stylesheet" href="../css/components.css" />
   <link rel="stylesheet" href="../css/dashboard.css" />
   <link rel="stylesheet" href="../css/admin.css" />
+  <link rel="stylesheet" href="../css/stats.css" />
 </head>
 <body>
   <div class="admin-shell">
@@ -45,15 +46,22 @@
       try {
         const data = await API.get("/api/admin/questions-count");
 
+        // Find max chapter count for bar scaling
+        let maxCount = 1;
+        data.subjects.forEach((subj) => {
+          subj.chapters.forEach((ch) => {
+            if (ch.count > maxCount) maxCount = ch.count;
+          });
+        });
+
         let html = `
-          <div class="stat-grid" style="margin-bottom:24px">
-            <div class="stat-box">
-              <div class="v">${data.total_questions}</div>
-              <div class="l">Total Questions</div>
-            </div>
-            <div class="stat-box">
-              <div class="v">${data.subjects.length}</div>
-              <div class="l">Subjects</div>
+          <!-- Hero Stats -->
+          <div class="stats-hero">
+            <div class="stats-hero-icon">❓</div>
+            <div class="stats-hero-value">${data.total_questions}</div>
+            <div class="stats-hero-label">Total Questions</div>
+            <div class="stats-hero-sub">
+              ${data.subjects.length} subject${data.subjects.length !== 1 ? "s" : ""} · ${data.subjects.reduce((s, x) => s + x.chapters.length, 0)} chapters
             </div>
           </div>
         `;
@@ -62,37 +70,77 @@
           html += `
             <div class="admin-empty">
               <div class="admin-empty-icon">📊</div>
-              <div class="admin-empty-title">No data</div>
+              <div class="admin-empty-title">No data yet</div>
               <div class="admin-empty-text">Add subjects and questions first</div>
             </div>
           `;
-        } else {
-          data.subjects.forEach((subj) => {
-            html += `
-              <section class="section">
-                <h3 class="section-title">
-                  ${escapeHtml(subj.subject_name)} — ${subj.total_questions} Q
-                </h3>
-                <div class="info-card">
-                  ${subj.chapters.length === 0
-                    ? `<div style="font-size:12px;color:var(--color-text-muted);padding:8px 0">No chapters</div>`
-                    : subj.chapters.map((ch) => `
-                      <div class="analysis-row">
-                        <div>
-                          <div class="name">${escapeHtml(ch.chapter_name)}</div>
-                          <div class="sub">${escapeHtml(ch.section_name)}</div>
-                        </div>
-                        <span class="badge ${ch.count === 0 ? 'badge-danger' : ch.count < 5 ? 'badge-warning' : 'badge-success'}">
-                          ${ch.count} Q
-                        </span>
-                      </div>
-                    `).join("")
-                  }
-                </div>
-              </section>
-            `;
-          });
+          main.innerHTML = html;
+          return;
         }
+
+        // Subject cards
+        data.subjects.forEach((subj, idx) => {
+          const colors = ["indigo", "teal", "amber", "rose", "purple", "pink"];
+          const color = colors[idx % colors.length];
+
+          html += `
+            <section class="subject-stats-card" data-color="${color}">
+              <div class="subject-stats-header">
+                <div class="subject-stats-icon">📚</div>
+                <div class="subject-stats-info">
+                  <div class="subject-stats-name">${escapeHtml(subj.subject_name)}</div>
+                  <div class="subject-stats-meta">${subj.chapters.length} chapters</div>
+                </div>
+                <div class="subject-stats-count">
+                  <div class="count-num">${subj.total_questions}</div>
+                  <div class="count-label">Q</div>
+                </div>
+              </div>
+
+              <div class="subject-stats-body">
+                ${subj.chapters.length === 0
+                  ? `<div class="no-chapters">No chapters in this subject</div>`
+                  : subj.chapters.map((ch) => {
+                      const pct = maxCount > 0 ? Math.round((ch.count / maxCount) * 100) : 0;
+                      const status = ch.count === 0 ? "empty" : ch.count < 5 ? "low" : "good";
+                      return `
+                        <div class="chapter-stat-row">
+                          <div class="chapter-stat-info">
+                            <div class="chapter-stat-name">${escapeHtml(ch.chapter_name)}</div>
+                            <div class="chapter-stat-section">${escapeHtml(ch.section_name)}</div>
+                          </div>
+                          <div class="chapter-stat-right">
+                            <div class="chapter-stat-bar">
+                              <div class="chapter-stat-bar-fill" data-status="${status}" style="width:${pct}%"></div>
+                            </div>
+                            <div class="chapter-stat-count" data-status="${status}">${ch.count}</div>
+                          </div>
+                        </div>
+                      `;
+                    }).join("")
+                }
+              </div>
+            </section>
+          `;
+        });
+
+        // Legend
+        html += `
+          <div class="stats-legend">
+            <div class="legend-row">
+              <span class="legend-dot" data-status="good"></span>
+              <span>5+ questions (good)</span>
+            </div>
+            <div class="legend-row">
+              <span class="legend-dot" data-status="low"></span>
+              <span>1-4 questions (low)</span>
+            </div>
+            <div class="legend-row">
+              <span class="legend-dot" data-status="empty"></span>
+              <span>0 questions (empty)</span>
+            </div>
+          </div>
+        `;
 
         main.innerHTML = html;
 
