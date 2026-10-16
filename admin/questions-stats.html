@@ -16,7 +16,7 @@
         <div class="admin-header-title">
           <button class="admin-back-btn" onclick="window.location.href='dashboard.html'">←</button>
           <div>
-            <h2>Question Stats</h2>
+            <h2>📊 Question Stats</h2>
             <p>Subject & chapter-wise count</p>
           </div>
         </div>
@@ -31,48 +31,80 @@
     </main>
   </div>
 
+  <div id="toastContainer" class="toast-container"></div>
+
   <script src="../js/config.js"></script>
   <script src="../js/api.js"></script>
   <script src="../js/toast.js"></script>
-  <script src="../js/modal.js"></script>
   <script src="../js/auth.js"></script>
   <script>
     (async function () {
       if (!requireAdmin()) return;
       const main = document.getElementById("statsMain");
+
       try {
         const data = await API.get("/api/admin/questions-count");
-        main.innerHTML = `
+
+        let html = `
           <div class="stat-grid" style="margin-bottom:24px">
-            <div class="stat-box"><div class="v">${data.total_questions}</div><div class="l">Total Questions</div></div>
-            <div class="stat-box"><div class="v">${data.subjects.length}</div><div class="l">Subjects</div></div>
+            <div class="stat-box">
+              <div class="v">${data.total_questions}</div>
+              <div class="l">Total Questions</div>
+            </div>
+            <div class="stat-box">
+              <div class="v">${data.subjects.length}</div>
+              <div class="l">Subjects</div>
+            </div>
           </div>
-          ${data.subjects.map((subj) => `
-            <section class="section">
-              <h3 class="section-title">${escapeHtml(subj.subject_name)} — ${subj.total_questions} Q</h3>
-              <div class="info-card">
-                ${subj.chapters.map((ch) => `
-                  <div class="analysis-row">
-                    <div>
-                      <div class="name">${escapeHtml(ch.chapter_name)}</div>
-                      <div class="sub">${escapeHtml(ch.section_name)}</div>
-                    </div>
-                    <span class="badge ${ch.count === 0 ? 'badge-danger' : ch.count < 5 ? 'badge-warning' : 'badge-success'}">
-                      ${ch.count} Q
-                    </span>
-                  </div>
-                `).join("")}
-              </div>
-            </section>
-          `).join("")}
         `;
+
+        if (data.subjects.length === 0) {
+          html += `
+            <div class="admin-empty">
+              <div class="admin-empty-icon">📊</div>
+              <div class="admin-empty-title">No data</div>
+              <div class="admin-empty-text">Add subjects and questions first</div>
+            </div>
+          `;
+        } else {
+          data.subjects.forEach((subj) => {
+            html += `
+              <section class="section">
+                <h3 class="section-title">
+                  ${escapeHtml(subj.subject_name)} — ${subj.total_questions} Q
+                </h3>
+                <div class="info-card">
+                  ${subj.chapters.length === 0
+                    ? `<div style="font-size:12px;color:var(--color-text-muted);padding:8px 0">No chapters</div>`
+                    : subj.chapters.map((ch) => `
+                      <div class="analysis-row">
+                        <div>
+                          <div class="name">${escapeHtml(ch.chapter_name)}</div>
+                          <div class="sub">${escapeHtml(ch.section_name)}</div>
+                        </div>
+                        <span class="badge ${ch.count === 0 ? 'badge-danger' : ch.count < 5 ? 'badge-warning' : 'badge-success'}">
+                          ${ch.count} Q
+                        </span>
+                      </div>
+                    `).join("")
+                  }
+                </div>
+              </section>
+            `;
+          });
+        }
+
+        main.innerHTML = html;
+
       } catch (e) {
+        console.error(e);
         main.innerHTML = `
           <div class="admin-empty">
             <div class="admin-empty-icon">❌</div>
-            <div class="admin-empty-title">Failed</div>
+            <div class="admin-empty-title">Failed to load</div>
             <div class="admin-empty-text">${escapeHtml(e.message)}</div>
-          </div>`;
+          </div>
+        `;
       }
     })();
 
