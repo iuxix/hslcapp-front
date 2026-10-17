@@ -145,6 +145,9 @@ const ExamAPI = {
   },
   async submit(testId) { return API.post(`/api/exam/${testId}/submit`); },
   async getResult(testId) { return API.get(`/api/exam/${testId}/result`); },
+
+  // ✅ NAYA — Exit without saving
+  async abandon(testId) { return API.post(`/api/exam/${testId}/abandon`); },
 };
 
 // ============================================================
