@@ -225,41 +225,35 @@
 
 .action-box:active { transform: scale(0.98); }
 
-/* ✅ MODERN SOFT PASTEL GRADIENTS */
-
-/* Start Exam — Soft Royal Blue */
+/* ✅ 1. Start Exam — Solid Indigo Blue */
 .action-box-primary {
-  background: linear-gradient(135deg, #5B73E8 0%, #4658D8 100%);
-  box-shadow: 0 8px 24px -6px rgba(91, 115, 232, 0.5);
+  background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%);
+  box-shadow: 0 8px 20px -6px rgba(37, 99, 235, 0.5);
 }
 
-/* Analyse — Fresh Teal */
+/* ✅ 2. Analyse — Deep Teal (Rich) */
 .action-box-teal {
-  background: linear-gradient(135deg, #14B8A6 0%, #0D9488 100%);
-  box-shadow: 0 8px 24px -6px rgba(20, 184, 166, 0.5);
+  background: linear-gradient(135deg, #0D9488 0%, #0F766E 100%);
+  box-shadow: 0 8px 20px -6px rgba(13, 148, 136, 0.5);
 }
 
-/* Mistakes — Soft Coral/Rose */
+/* ✅ 3. Mistakes — Coral Rose (KEEPING AS IT IS) */
 .action-box-rose {
-  background: linear-gradient(135deg, #FB7185 0%, #E11D48 100%);
-  box-shadow: 0 8px 24px -6px rgba(251, 113, 133, 0.5);
+  background: linear-gradient(135deg, #F43F5E 0%, #E11D48 100%);
+  box-shadow: 0 8px 20px -6px rgba(244, 63, 94, 0.5);
 }
 
-/* Weak Areas — Bright Amber/Orange */
+/* ✅ 4. Weak Areas — Warm Amber (KEEPING AS IT IS) */
 .action-box-amber {
-  background: linear-gradient(135deg, #FBBF24 0%, #D97706 100%);
-  box-shadow: 0 8px 24px -6px rgba(251, 191, 36, 0.5);
+  background: linear-gradient(135deg, #F59E0B 0%, #D97706 100%);
+  box-shadow: 0 8px 20px -6px rgba(245, 158, 11, 0.5);
 }
 
-/* Extra (if used) — Soft Purple */
-.action-box-deep-purple {
-  background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%);
-  box-shadow: 0 8px 24px -6px rgba(167, 139, 250, 0.5);
-}
-
+/* Extra (Fallbacks just in case) */
+.action-box-deep-purple,
 .action-box-purple {
-  background: linear-gradient(135deg, #A78BFA 0%, #7C3AED 100%);
-  box-shadow: 0 8px 24px -6px rgba(167, 139, 250, 0.5);
+  background: linear-gradient(135deg, #8B5CF6 0%, #7C3AED 100%);
+  box-shadow: 0 8px 20px -6px rgba(139, 92, 246, 0.5);
 }
 
 .action-box-large { padding: var(--space-5); }
@@ -464,13 +458,12 @@
   width: 56px;
   height: 56px;
   border-radius: var(--radius-full);
-  /* ✅ Fresh Blue Gradient */
-  background: linear-gradient(135deg, #5B73E8, #4658D8);
+  background: linear-gradient(135deg, #3B82F6, #2563EB); /* ✅ Blue */
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 6px 20px rgba(91, 115, 232, 0.4);
+  box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45);
   flex-shrink: 0;
   margin: 0 var(--space-2);
   transition: transform 150ms ease;
