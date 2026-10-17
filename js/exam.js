@@ -13,7 +13,7 @@ let state = {
 };
 
 let timerEl = null;
-const chapterNameCache = {}; // ← NEW: chapter names cache
+const chapterNameCache = {};
 
 (function () {
   console.log("exam.js loaded");
@@ -52,7 +52,6 @@ const chapterNameCache = {}; // ← NEW: chapter names cache
     document.getElementById("examSubtitle").textContent =
       `${state.questions.length} Q • ${Math.floor(state.remainingSec / 60)} min`;
 
-    // Prefetch chapter names (background)
     prefetchChapterNames();
 
     console.log("Starting render...");
@@ -81,9 +80,7 @@ async function prefetchChapterNames() {
     try {
       const ch = await PublicAPI.getChapter(chId);
       chapterNameCache[chId] = ch.name;
-      console.log(`Chapter ${chId}: ${ch.name}`);
 
-      // Re-render current question if it's this chapter
       const currentQ = state.questions[state.currentIndex];
       if (currentQ && currentQ.chapter_id === chId) {
         updateChapterLabel();
@@ -129,7 +126,6 @@ function renderQuestion() {
   document.getElementById("qDifficulty").textContent =
     q.difficulty ? q.difficulty.charAt(0).toUpperCase() + q.difficulty.slice(1) : "Easy";
 
-  // Chapter name
   const qChapterEl = document.getElementById("qChapter");
   if (qChapterEl) {
     qChapterEl.textContent = getChapterName(q.chapter_id);
@@ -381,49 +377,40 @@ async function submitTest(auto) {
 }
 
 // ============================================================
-// EXIT — Without Saving (Local Only)
+// EXIT — Abandon Test (API Call)
 // ============================================================
 
 function confirmExit() {
   try {
     showModal({
       title: "Exit Exam?",
-      content: "Agar aap exit karenge toh ye test save NAHI hoga. Progress delete ho jayega.",
-      customContent: `
-        <button class="exit-option danger" onclick="window.__exitWithoutSave()">
-          <span class="exit-icon">✕</span>
-          <span class="exit-info">
-            <span class="exit-title">Exit Without Saving</span>
-            <span class="exit-sub">Progress delete ho jayega. Fresh start karna padega.</span>
-          </span>
-        </button>
-        <button class="exit-option" onclick="closeModal()">
-          <span class="exit-icon">↩</span>
-          <span class="exit-info">
-            <span class="exit-title">Stay on Exam</span>
-            <span class="exit-sub">Cancel and continue the test.</span>
-          </span>
-        </button>
-      `,
-      actions: [],
+      content: "Your progress will not be saved. This attempt will be discarded.",
+      actions: [
+        { label: "Stay", style: "outline", onClick: "closeModal()" },
+        { label: "Exit", style: "danger", onClick: "window.__exitAndAbandon()" },
+      ],
     });
   } catch (e) {
     console.error("confirmExit error:", e);
   }
 }
 
-window.__exitWithoutSave = function () {
+window.__exitAndAbandon = async function () {
   closeModal();
 
-  // Timer band karo
   state.submitted = true;
   clearInterval(state.timerInterval);
 
-  // ✅ Local data saaf karo — bas itna hi
+  try {
+    showToast("Exiting...", "info", 800);
+    await ExamAPI.abandon(state.testId);
+  } catch (e) {
+    console.error("Abandon error:", e);
+  }
+
   localStorage.removeItem("currentTestData");
   localStorage.removeItem("currentTestId");
 
-  showToast("Exam exited", "info", 800);
   setTimeout(() => (window.location.href = "dashboard.html"), 500);
 };
 
