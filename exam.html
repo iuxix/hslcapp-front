@@ -14,8 +14,8 @@
   <div class="exam-shell">
     <header class="exam-header">
       <button class="exam-pause-btn" onclick="confirmExit()">
-        <span class="pause-icon">⏸</span>
-        <span class="pause-text">Pause</span>
+        <span class="pause-icon">✕</span>
+        <span class="pause-text">Exit</span>
       </button>
 
       <div class="exam-header-center">
@@ -69,9 +69,7 @@
       <div class="palette-grid" id="paletteGrid"></div>
     </aside>
 
-    <footer class="exam-footer">
-      <button class="btn btn-primary btn-block" onclick="confirmSubmit()">Submit Test</button>
-    </footer>
+    <!-- ❌ Submit button HATA DIYA — sirf Next ka last question pe "Review ✓" click karne se submit hoga -->
   </div>
 
   <div id="modalRoot"></div>
@@ -87,12 +85,5 @@
   <script src="js/modal.js"></script>
   <script src="js/auth.js"></script>
   <script src="js/exam.js"></script>
-<!-- Debug: Eruda (testing only) -->
- <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
- <script>
-   if (window.location.hostname.includes('vercel.app') || window.location.hostname === 'localhost') {
-     eruda.init();
-   }
-</script>
 </body>
 </html>
