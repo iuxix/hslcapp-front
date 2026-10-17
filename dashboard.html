@@ -5,14 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Dashboard — Perficiently</title>
   
-  <!-- ✅ Favicon -->
   <link rel="icon" type="image/png" href="images/favicon.png" />
   
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
 
-  <!-- ✅ Professional Branding & Colors -->
   <style>
     /* Action Box Colors */
     .action-box-deep-purple, .action-box-primary {
@@ -32,32 +30,38 @@
     .brand-header {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 14px;
       margin-bottom: 24px;
       padding-bottom: 16px;
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
-    .brand-logo-box {
-      width: 48px; /* Box thoda bada kiya */
+    
+    /* ✅ Circular Logo Box */
+    .brand-logo-circle {
+      width: 48px;
       height: 48px;
+      background: #ffffff; /* White base for logo */
+      border-radius: 50%; /* Perfect Circle */
       display: flex;
       align-items: center;
       justify-content: center;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,255,255,0.1);
+      overflow: hidden;
     }
-    .brand-logo-box img {
-      width: 42px; /* Logo bada kiya */
+    .brand-logo-circle img {
+      width: 32px; 
       height: auto;
-      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); /* Premium shadow */
     }
+    
     .brand-name {
-      font-size: 22px; /* Text bada kiya */
+      font-size: 22px;
       font-weight: 800;
       color: #fff;
       letter-spacing: -0.03em;
       margin: 0;
     }
     .brand-name span {
-      color: #60A5FA; /* Blue accent for "ly" */
+      color: #60A5FA;
     }
     .brand-subtitle {
       font-size: 11px;
@@ -75,7 +79,7 @@
       
       <!-- ✅ PREMIUM BRAND HEADER -->
       <div class="brand-header">
-        <div class="brand-logo-box">
+        <div class="brand-logo-circle">
           <img src="images/logo.png" alt="Perficiently Logo" />
         </div>
         <div>
