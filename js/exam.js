@@ -381,24 +381,24 @@ async function submitTest(auto) {
 }
 
 // ============================================================
-// EXIT
+// EXIT — Without Saving Anything
 // ============================================================
 
 function confirmExit() {
   try {
     showModal({
-      title: "Pause Exam?",
-      content: "Your answers are already saved to the server.",
+      title: "Exit Exam?",
+      content: "Agar aap exit karenge toh ye test save NAHI hoga. Progress delete ho jayega.",
       customContent: `
-        <button class="exit-option" onclick="window.__saveAndExit()">
-          <span class="exit-icon">💾</span>
+        <button class="exit-option danger" onclick="window.__exitWithoutSave()">
+          <span class="exit-icon">✕</span>
           <span class="exit-info">
-            <span class="exit-title">Save & Exit</span>
-            <span class="exit-sub">Your progress is saved. Resume later.</span>
+            <span class="exit-title">Exit Without Saving</span>
+            <span class="exit-sub">Progress delete ho jayega. Fresh start karna padega.</span>
           </span>
         </button>
-        <button class="exit-option danger" onclick="closeModal()">
-          <span class="exit-icon">✕</span>
+        <button class="exit-option" onclick="closeModal()">
+          <span class="exit-icon">↩</span>
           <span class="exit-info">
             <span class="exit-title">Stay on Exam</span>
             <span class="exit-sub">Cancel and continue the test.</span>
@@ -412,13 +412,28 @@ function confirmExit() {
   }
 }
 
-window.__saveAndExit = function () {
+window.__exitWithoutSave = async function () {
   closeModal();
+
+  // Timer band karo
   state.submitted = true;
   clearInterval(state.timerInterval);
-  closeCurrentTiming();
-  showToast("Progress saved!", "success", 1000);
-  setTimeout(() => (window.location.href = "dashboard.html"), 800);
+
+  try {
+    showToast("Exiting...", "info", 800);
+    // Server pe test abandon karo (kuch save nahi hoga)
+    await ExamAPI.abandon(state.testId);
+  } catch (e) {
+    console.error("Abandon error:", e);
+    // Agar abandon fail bhi ho jaye, local data toh clear karo
+  }
+
+  // Local data saaf karo
+  localStorage.removeItem("currentTestData");
+  localStorage.removeItem("currentTestId");
+
+  showToast("Exam exited", "info", 800);
+  setTimeout(() => (window.location.href = "dashboard.html"), 500);
 };
 
 // ============================================================
