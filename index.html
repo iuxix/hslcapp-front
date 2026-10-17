@@ -3,16 +3,66 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login — SEBA HSLC</title>
+  <title>Login — Perficiently</title>
+  
+  <!-- ✅ Favicon -->
+  <link rel="icon" type="image/png" href="images/favicon.png" />
+  
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/auth.css" />
+
+  <!-- ✅ Premium Branding Style -->
+  <style>
+    .auth-brand {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      margin-bottom: 28px;
+    }
+    .brand-logo-wrapper {
+      width: 76px;
+      height: 76px;
+      background: #ffffff;
+      border-radius: 22px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06), 0 2px 8px rgba(0,0,0,0.04);
+      margin-bottom: 16px;
+      border: 1px solid #E2E8F0;
+    }
+    .brand-logo-wrapper img {
+      width: 46px;
+      height: auto;
+    }
+    .brand-name {
+      font-size: 26px;
+      font-weight: 900;
+      color: #0F172A;
+      letter-spacing: -0.04em;
+      margin: 0 0 6px 0;
+    }
+    .brand-name span {
+      color: #2563EB; /* Perficiently Blue accent */
+    }
+    .brand-tag {
+      font-size: 13px;
+      color: #64748B;
+      font-weight: 500;
+    }
+  </style>
 </head>
 <body class="auth-body">
   <div class="auth-shell">
+    
+    <!-- ✅ Premium Brand Section -->
     <div class="auth-brand">
-      <div class="brand-logo">🎓</div>
-      <h1 class="brand-name">SEBA HSLC</h1>
+      <div class="brand-logo-wrapper">
+        <img src="images/logo.png" alt="Perficiently Logo" />
+      </div>
+      <h1 class="brand-name">Perficient<span>ly</span></h1>
       <p class="brand-tag">Class 10 Study Platform</p>
     </div>
 
