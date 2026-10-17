@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
 
-  <!-- ✅ Professional Branding Overrides -->
+  <!-- ✅ Professional Branding & Colors -->
   <style>
     /* Action Box Colors */
     .action-box-deep-purple, .action-box-primary {
@@ -38,23 +38,19 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
     .brand-logo-box {
-      width: 42px;
-      height: 42px;
-      background: rgba(255, 255, 255, 0.08);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-      border-radius: 12px;
+      width: 48px; /* Box thoda bada kiya */
+      height: 48px;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: inset 0 2px 4px rgba(255,255,255,0.05);
     }
     .brand-logo-box img {
-      width: 26px;
+      width: 42px; /* Logo bada kiya */
       height: auto;
-      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+      filter: drop-shadow(0 4px 8px rgba(0,0,0,0.4)); /* Premium shadow */
     }
     .brand-name {
-      font-size: 20px;
+      font-size: 22px; /* Text bada kiya */
       font-weight: 800;
       color: #fff;
       letter-spacing: -0.03em;
@@ -113,7 +109,6 @@
     </header>
 
     <main class="app-main">
-      <!-- Start Exam -->
       <section class="section">
         <button class="action-box action-box-primary action-box-large" onclick="startExam()">
           <div class="box-icon">🎯</div>
@@ -125,7 +120,6 @@
         </button>
       </section>
 
-      <!-- Analyse -->
       <section class="section">
         <button class="action-box action-box-teal action-box-medium" onclick="goTo('analyse.html')">
           <div class="box-icon">📊</div>
@@ -137,7 +131,6 @@
         </button>
       </section>
 
-      <!-- Mistakes + Weak Areas -->
       <section class="section">
         <div class="box-grid-2">
           <button class="action-box action-box-rose" onclick="goTo('mistakes.html')">
@@ -153,7 +146,6 @@
         </div>
       </section>
 
-      <!-- History -->
       <section class="section">
         <h3 class="section-title">📜 Recent History</h3>
         <div id="recentTests"></div>
@@ -162,7 +154,6 @@
         </button>
       </section>
 
-      <!-- Weak Chapters -->
       <section class="section">
         <h3 class="section-title">🎯 Weak Chapters</h3>
         <div id="weakChapters"></div>
