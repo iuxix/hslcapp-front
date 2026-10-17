@@ -12,6 +12,12 @@
   <link rel="stylesheet" href="css/dashboard.css" />
 
   <style>
+    /* ✅ Header Fix: Scroll karne par header upar chala jayega (sticky nahi rahega) */
+    .app-header {
+      position: relative !important; 
+      top: auto !important;
+    }
+
     /* Action Box Colors */
     .action-box-deep-purple, .action-box-primary {
       background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
@@ -36,21 +42,24 @@
       border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
     
-    /* ✅ Circular Logo Box */
+    /* Circular Logo Box */
     .brand-logo-circle {
       width: 48px;
       height: 48px;
-      background: #ffffff; /* White base for logo */
-      border-radius: 50%; /* Perfect Circle */
+      background: #ffffff;
+      border-radius: 50%; 
       display: flex;
       align-items: center;
       justify-content: center;
       box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,255,255,0.1);
-      overflow: hidden;
+      overflow: hidden; /* Image circle se bahar na nikle */
     }
+    
+    /* ✅ Logo Size Badhaya (Circle ko pura cover karega) */
     .brand-logo-circle img {
-      width: 32px; 
+      width: 36px; /* Pehle 28px tha, ab 36px kiya */
       height: auto;
+      transform: scale(1.1); /* Thoda aur zoom kiya */
     }
     
     .brand-name {
@@ -75,9 +84,9 @@
 </head>
 <body>
   <div class="app-shell">
+    <!-- Header ab scroll hone par fix nahi rahega -->
     <header class="app-header">
       
-      <!-- ✅ PREMIUM BRAND HEADER -->
       <div class="brand-header">
         <div class="brand-logo-circle">
           <img src="images/logo.png" alt="Perficiently Logo" />
