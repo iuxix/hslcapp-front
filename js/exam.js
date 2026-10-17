@@ -381,7 +381,7 @@ async function submitTest(auto) {
 }
 
 // ============================================================
-// EXIT — Without Saving Anything
+// EXIT — Without Saving (Local Only)
 // ============================================================
 
 function confirmExit() {
@@ -412,23 +412,14 @@ function confirmExit() {
   }
 }
 
-window.__exitWithoutSave = async function () {
+window.__exitWithoutSave = function () {
   closeModal();
 
   // Timer band karo
   state.submitted = true;
   clearInterval(state.timerInterval);
 
-  try {
-    showToast("Exiting...", "info", 800);
-    // Server pe test abandon karo (kuch save nahi hoga)
-    await ExamAPI.abandon(state.testId);
-  } catch (e) {
-    console.error("Abandon error:", e);
-    // Agar abandon fail bhi ho jaye, local data toh clear karo
-  }
-
-  // Local data saaf karo
+  // ✅ Local data saaf karo — bas itna hi
   localStorage.removeItem("currentTestData");
   localStorage.removeItem("currentTestId");
 
