@@ -20,22 +20,26 @@
       margin-bottom: 28px;
     }
     
-    /* ✅ Circular Logo Wrapper for Login */
+    /* Circular Logo Wrapper for Login */
     .brand-logo-circle {
       width: 88px;
       height: 88px;
       background: #ffffff;
-      border-radius: 50%; /* Perfect Circle */
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
       margin-bottom: 16px;
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0,0,0,0.04);
       border: 1px solid #E2E8F0;
+      overflow: hidden;
     }
+    
+    /* ✅ Login Logo Size Badhaya */
     .brand-logo-circle img {
-      width: 52px; /* Logo size */
+      width: 68px; /* Pehle 52px tha, ab 68px kiya */
       height: auto;
+      transform: scale(1.1);
     }
     
     .brand-name {
@@ -58,7 +62,6 @@
 <body class="auth-body">
   <div class="auth-shell">
     
-    <!-- ✅ Premium Brand Section -->
     <div class="auth-brand">
       <div class="brand-logo-circle">
         <img src="images/logo.png" alt="Perficiently Logo" />
