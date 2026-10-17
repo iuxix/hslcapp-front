@@ -453,19 +453,9 @@
 }
 
 /* ========== FOOTER ========== */
+/* ✅ FIX: Submit button hatne ke baad niche ka black gradient / shadow hataya gaya hai */
 .exam-footer {
-  position: sticky;
-  bottom: 0;
-  background: #FFFFFF;
-  border-top: 1px solid var(--color-border);
-  padding: var(--space-3) var(--space-4) calc(var(--space-3) + env(safe-area-inset-bottom));
-  z-index: 100;
-  box-shadow: 0 -2px 12px rgba(15, 23, 42, 0.04);
-}
-
-.exam-footer .btn {
-  min-height: 50px;
-  font-size: 15px;
+  display: none;
 }
 
 /* ========== MODAL ========== */
