@@ -13,6 +13,7 @@
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
+  <!-- ✅ Naya Apple Style Design (Direct HTML mein override kiya hai taaki CSS file kharab na ho) -->
   <style>
     :root {
       --bg-color: #F5F5F7;
@@ -31,7 +32,7 @@
       padding-bottom: 90px;
     }
 
-    /* Clean Header */
+    /* Header */
     .apple-header {
       background: rgba(245, 245, 247, 0.85);
       backdrop-filter: saturate(180%) blur(20px);
@@ -46,18 +47,16 @@
 
     .brand-left { display: flex; align-items: center; gap: 10px; }
     
-    /* ✅ Logo Size Fixed */
+    /* Logo Size Fixed */
     .brand-logo-circle {
       width: 42px; height: 42px;
       background: #fff; border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
       box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-      overflow: hidden; /* Keeps image inside circle */
+      overflow: hidden;
     }
     .brand-logo-circle img { 
-      width: 34px; 
-      height: auto;
-      transform: scale(1.2); /* Zooms logo to fill circle */
+      width: 34px; height: auto; transform: scale(1.2); 
     }
     
     .brand-name { font-size: 18px; font-weight: 800; color: var(--text-main); margin: 0; letter-spacing: -0.03em; }
@@ -78,7 +77,7 @@
     .greeting h1 { font-size: 28px; font-weight: 800; margin: 0 0 4px 0; letter-spacing: -0.04em; }
     .greeting p { font-size: 14px; color: var(--text-sub); margin: 0; font-weight: 500; }
 
-    /* Bento Grid */
+    /* Bento Grid Layout */
     .bento-grid {
       display: grid;
       grid-template-columns: 2fr 1fr;
@@ -114,8 +113,7 @@
       content: '🎯';
       position: absolute;
       bottom: -10px; right: -10px;
-      font-size: 100px;
-      opacity: 0.1;
+      font-size: 100px; opacity: 0.1;
     }
     .bento-start .title { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; z-index: 1; }
     .bento-start .sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; z-index: 1;}
@@ -134,7 +132,7 @@
     .bento-stat .val { font-size: 22px; font-weight: 800; color: var(--text-main); letter-spacing: -0.03em; }
     .bento-stat .lbl { font-size: 11px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; margin-top: 2px;}
 
-    /* 3. Actions (Analyse, Mistakes, Weak Areas) */
+    /* 3. Actions */
     .bento-actions-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -162,7 +160,7 @@
 
     .section-title { font-size: 18px; font-weight: 700; margin-bottom: 12px; letter-spacing: -0.02em; }
 
-    /* ✅ Fixed Bottom Nav */
+    /* Fixed Bottom Nav */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; right: 0;
       background: rgba(255, 255, 255, 0.95);
@@ -186,7 +184,7 @@
       box-shadow: 0 6px 16px rgba(0, 113, 227, 0.4); cursor: pointer;
     }
 
-    /* Hide old elements */
+    /* Purane elements hide kar rahe hain taaki purani CSS interfere na kare */
     .app-header, .app-shell, .action-box, .header-top, .header-stats, .box-grid-2 { display: none !important; }
   </style>
 </head>
@@ -199,7 +197,6 @@
       </div>
       <h1 class="brand-name">Perficient<span>ly</span></h1>
     </div>
-    <!-- ✅ ID for Avatar -->
     <div class="header-avatar" id="userAvatar" onclick="goTo('profile.html')">S</div>
   </header>
 
@@ -210,7 +207,7 @@
       <p>Ready to practice for your exams?</p>
     </div>
 
-    <!-- Bento Grid -->
+    <!-- ✅ SAME OLD IDs (statTests, statAccuracy) -->
     <div class="bento-grid">
       <button class="bento-card bento-start" onclick="startExam()">
         <div>
@@ -220,14 +217,13 @@
         <div class="arrow">→</div>
       </button>
 
-      <!-- ✅ NEW IDS -->
       <div class="bento-card bento-stat">
-        <div class="val" id="newStatTests">0</div>
+        <div class="val" id="statTests">0</div>
         <div class="lbl">Tests</div>
       </div>
 
       <div class="bento-card bento-stat">
-        <div class="val" id="newStatAccuracy">--</div>
+        <div class="val" id="statAccuracy">--</div>
         <div class="lbl">Accuracy</div>
       </div>
     </div>
@@ -248,21 +244,19 @@
       </button>
     </div>
 
-    <!-- History -->
+    <!-- ✅ SAME OLD ID (recentTests) -->
     <section style="margin-top: 24px;">
       <h3 class="section-title">Recent History</h3>
-      <!-- ✅ NEW ID -->
-      <div id="newRecentTests"></div>
+      <div id="recentTests"></div>
       <button class="btn btn-ghost btn-block" style="margin-top:12px; color: var(--blue-accent);" onclick="goTo('history.html')">
         See all history →
       </button>
     </section>
 
-    <!-- Weak Chapters -->
+    <!-- ✅ SAME OLD ID (weakChapters) -->
     <section style="margin-top: 24px;">
       <h3 class="section-title">Weak Chapters</h3>
-      <!-- ✅ NEW ID -->
-      <div id="newWeakChapters"></div>
+      <div id="weakChapters"></div>
     </section>
 
   </main>
