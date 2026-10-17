@@ -3,40 +3,95 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Dashboard — SEBA HSLC</title>
+  <title>Dashboard — Perficiently</title>
+  
+  <!-- ✅ Favicon -->
+  <link rel="icon" type="image/png" href="images/favicon.png" />
+  
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
 
-  <!-- ✅ Professional Color Overrides -->
+  <!-- ✅ Professional Branding Overrides -->
   <style>
-    /* 1. Start Exam — Rich Ocean Blue */
-    .action-box-deep-purple, 
-    .action-box-primary {
+    /* Action Box Colors */
+    .action-box-deep-purple, .action-box-primary {
       background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
       box-shadow: 0 8px 24px -6px rgba(37, 99, 235, 0.5) !important;
     }
-
-    /* 2. Analyse — Fresh Emerald Green */
     .action-box-teal {
       background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
       box-shadow: 0 8px 24px -6px rgba(16, 185, 129, 0.5) !important;
     }
-
-    /* 3. Plus (+) Button — Matching Blue */
     .fab {
       background: linear-gradient(135deg, #3B82F6, #2563EB) !important;
       box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45) !important;
+    }
+
+    /* Premium Brand Header */
+    .brand-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 24px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+    .brand-logo-box {
+      width: 42px;
+      height: 42px;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: inset 0 2px 4px rgba(255,255,255,0.05);
+    }
+    .brand-logo-box img {
+      width: 26px;
+      height: auto;
+      filter: drop-shadow(0 2px 4px rgba(0,0,0,0.3));
+    }
+    .brand-name {
+      font-size: 20px;
+      font-weight: 800;
+      color: #fff;
+      letter-spacing: -0.03em;
+      margin: 0;
+    }
+    .brand-name span {
+      color: #60A5FA; /* Blue accent for "ly" */
+    }
+    .brand-subtitle {
+      font-size: 11px;
+      color: rgba(255, 255, 255, 0.6);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-top: 2px;
     }
   </style>
 </head>
 <body>
   <div class="app-shell">
     <header class="app-header">
+      
+      <!-- ✅ PREMIUM BRAND HEADER -->
+      <div class="brand-header">
+        <div class="brand-logo-box">
+          <img src="images/logo.png" alt="Perficiently Logo" />
+        </div>
+        <div>
+          <h1 class="brand-name">Perficient<span>ly</span></h1>
+          <div class="brand-subtitle">Class 10 Study Platform</div>
+        </div>
+      </div>
+
       <div class="header-top">
         <div class="header-greeting">
           <h2 id="greetingName">Hi, Student 👋</h2>
-          <p>Class 10 • SEBA HSLC</p>
+          <p>Class 10 • Perficiently</p>
         </div>
         <div class="header-avatar" id="userAvatar" onclick="goTo('profile.html')">S</div>
       </div>
@@ -58,7 +113,7 @@
     </header>
 
     <main class="app-main">
-      <!-- Start Exam — Now Ocean Blue -->
+      <!-- Start Exam -->
       <section class="section">
         <button class="action-box action-box-primary action-box-large" onclick="startExam()">
           <div class="box-icon">🎯</div>
@@ -70,7 +125,7 @@
         </button>
       </section>
 
-      <!-- Analyse — Emerald Green -->
+      <!-- Analyse -->
       <section class="section">
         <button class="action-box action-box-teal action-box-medium" onclick="goTo('analyse.html')">
           <div class="box-icon">📊</div>
@@ -82,7 +137,7 @@
         </button>
       </section>
 
-      <!-- Mistakes + Weak Areas (Unchanged) -->
+      <!-- Mistakes + Weak Areas -->
       <section class="section">
         <div class="box-grid-2">
           <button class="action-box action-box-rose" onclick="goTo('mistakes.html')">
