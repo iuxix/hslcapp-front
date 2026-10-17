@@ -5,14 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Login — Perficiently</title>
   
-  <!-- ✅ Favicon -->
   <link rel="icon" type="image/png" href="images/favicon.png" />
   
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/auth.css" />
 
-  <!-- ✅ Premium Branding Style -->
   <style>
     .auth-brand {
       display: flex;
@@ -21,20 +19,25 @@
       text-align: center;
       margin-bottom: 28px;
     }
-    .brand-logo-wrapper {
-      width: 90px; /* Wrapper bada kiya */
-      height: 90px;
-      background: transparent; /* Background hataya */
+    
+    /* ✅ Circular Logo Wrapper for Login */
+    .brand-logo-circle {
+      width: 88px;
+      height: 88px;
+      background: #ffffff;
+      border-radius: 50%; /* Perfect Circle */
       display: flex;
       align-items: center;
       justify-content: center;
-      margin-bottom: 12px;
+      margin-bottom: 16px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08), 0 2px 8px rgba(0,0,0,0.04);
+      border: 1px solid #E2E8F0;
     }
-    .brand-logo-wrapper img {
-      width: 80px; /* Logo bada kiya */
+    .brand-logo-circle img {
+      width: 52px; /* Logo size */
       height: auto;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.1));
     }
+    
     .brand-name {
       font-size: 28px;
       font-weight: 900;
@@ -43,7 +46,7 @@
       margin: 0 0 4px 0;
     }
     .brand-name span {
-      color: #2563EB; /* Perficiently Blue accent */
+      color: #2563EB;
     }
     .brand-tag {
       font-size: 13px;
@@ -57,7 +60,7 @@
     
     <!-- ✅ Premium Brand Section -->
     <div class="auth-brand">
-      <div class="brand-logo-wrapper">
+      <div class="brand-logo-circle">
         <img src="images/logo.png" alt="Perficiently Logo" />
       </div>
       <h1 class="brand-name">Perficient<span>ly</span></h1>
