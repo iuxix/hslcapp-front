@@ -7,6 +7,28 @@
   <link rel="stylesheet" href="css/base.css" />
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
+
+  <!-- ✅ Professional Color Overrides -->
+  <style>
+    /* 1. Start Exam — Rich Ocean Blue */
+    .action-box-deep-purple, 
+    .action-box-primary {
+      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
+      box-shadow: 0 8px 24px -6px rgba(37, 99, 235, 0.5) !important;
+    }
+
+    /* 2. Analyse — Fresh Emerald Green */
+    .action-box-teal {
+      background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
+      box-shadow: 0 8px 24px -6px rgba(16, 185, 129, 0.5) !important;
+    }
+
+    /* 3. Plus (+) Button — Matching Blue */
+    .fab {
+      background: linear-gradient(135deg, #3B82F6, #2563EB) !important;
+      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45) !important;
+    }
+  </style>
 </head>
 <body>
   <div class="app-shell">
@@ -36,9 +58,9 @@
     </header>
 
     <main class="app-main">
-      <!-- Start Exam — Deep Purple -->
+      <!-- Start Exam — Now Ocean Blue -->
       <section class="section">
-        <button class="action-box action-box-deep-purple action-box-large" onclick="startExam()">
+        <button class="action-box action-box-primary action-box-large" onclick="startExam()">
           <div class="box-icon">🎯</div>
           <div class="box-content">
             <div class="box-title-large">Start Exam</div>
@@ -48,7 +70,7 @@
         </button>
       </section>
 
-      <!-- Analyse — Teal -->
+      <!-- Analyse — Emerald Green -->
       <section class="section">
         <button class="action-box action-box-teal action-box-medium" onclick="goTo('analyse.html')">
           <div class="box-icon">📊</div>
@@ -60,7 +82,7 @@
         </button>
       </section>
 
-      <!-- Mistakes + Weak Areas -->
+      <!-- Mistakes + Weak Areas (Unchanged) -->
       <section class="section">
         <div class="box-grid-2">
           <button class="action-box action-box-rose" onclick="goTo('mistakes.html')">
