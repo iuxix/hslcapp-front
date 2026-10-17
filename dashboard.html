@@ -13,7 +13,6 @@
   
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
 
-  <!-- ✅ Naya Apple Style Design (Direct HTML mein override kiya hai taaki CSS file kharab na ho) -->
   <style>
     :root {
       --bg-color: #F5F5F7;
@@ -21,7 +20,7 @@
       --text-main: #1D1D1F;
       --text-sub: #86868B;
       --blue-accent: #0071E3;
-      --radius-lg: 24px;
+      --radius-lg: 20px;
     }
 
     body {
@@ -32,7 +31,7 @@
       padding-bottom: 90px;
     }
 
-    /* Header */
+    /* Clean Header */
     .apple-header {
       background: rgba(245, 245, 247, 0.85);
       backdrop-filter: saturate(180%) blur(20px);
@@ -47,7 +46,6 @@
 
     .brand-left { display: flex; align-items: center; gap: 10px; }
     
-    /* Logo Size Fixed */
     .brand-logo-circle {
       width: 42px; height: 42px;
       background: #fff; border-radius: 50%;
@@ -69,59 +67,48 @@
       font-weight: 700; font-size: 16px; cursor: pointer;
     }
 
-    /* Main Container */
     .app-main { padding: 16px; max-width: 720px; margin: 0 auto; }
 
-    /* Greeting */
     .greeting { margin-bottom: 20px; }
     .greeting h1 { font-size: 28px; font-weight: 800; margin: 0 0 4px 0; letter-spacing: -0.04em; }
     .greeting p { font-size: 14px; color: var(--text-sub); margin: 0; font-weight: 500; }
 
-    /* Bento Grid Layout */
-    .bento-grid {
+    /* ✅ Start Exam Card */
+    .bento-start {
+      background: linear-gradient(145deg, #1E293B, #0F172A);
+      color: #fff;
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.4);
+      margin-bottom: 12px;
+      width: 100%;
+      border: none;
+      text-align: left;
+      cursor: pointer;
+    }
+    .bento-start::after {
+      content: '🎯'; position: absolute; bottom: -15px; right: -10px; font-size: 110px; opacity: 0.1;
+    }
+    .bento-start .title { font-size: 22px; font-weight: 800; z-index: 1; }
+    .bento-start .sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; z-index: 1;}
+    .bento-start .arrow { font-size: 24px; margin-top: 16px; z-index: 1;}
+
+    /* ✅ Stats Row (3 Columns) */
+    .stats-row {
       display: grid;
-      grid-template-columns: 2fr 1fr;
+      grid-template-columns: repeat(3, 1fr);
       gap: 12px;
       margin-bottom: 12px;
     }
-
-    .bento-card {
-      border-radius: var(--radius-lg);
-      padding: 20px;
-      cursor: pointer;
-      transition: transform 0.2s ease;
-      border: 1px solid rgba(0,0,0,0.04);
-      text-align: left;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-    }
-    .bento-card:active { transform: scale(0.97); }
-
-    /* 1. Start Exam */
-    .bento-start {
-      grid-column: 1 / 2;
-      grid-row: 1 / 3;
-      background: linear-gradient(145deg, #1E293B, #0F172A);
-      color: #fff;
-      box-shadow: 0 10px 30px -10px rgba(15, 23, 42, 0.4);
-      min-height: 180px;
-      position: relative;
-      overflow: hidden;
-    }
-    .bento-start::after {
-      content: '🎯';
-      position: absolute;
-      bottom: -10px; right: -10px;
-      font-size: 100px; opacity: 0.1;
-    }
-    .bento-start .title { font-size: 22px; font-weight: 800; letter-spacing: -0.03em; z-index: 1; }
-    .bento-start .sub { font-size: 13px; color: rgba(255,255,255,0.7); margin-top: 4px; z-index: 1;}
-    .bento-start .arrow { font-size: 24px; font-weight: 300; z-index: 1; margin-top: auto;}
-
-    /* 2. Stats */
     .bento-stat {
       background: var(--card-bg);
+      border-radius: var(--radius-lg);
+      padding: 16px 8px;
       display: flex;
       flex-direction: column;
       justify-content: center;
@@ -129,10 +116,10 @@
       box-shadow: 0 4px 12px rgba(0,0,0,0.03);
       text-align: center;
     }
-    .bento-stat .val { font-size: 22px; font-weight: 800; color: var(--text-main); letter-spacing: -0.03em; }
-    .bento-stat .lbl { font-size: 11px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; margin-top: 2px;}
+    .bento-stat .val { font-size: 20px; font-weight: 800; color: var(--text-main); letter-spacing: -0.03em; }
+    .bento-stat .lbl { font-size: 10px; font-weight: 600; color: var(--text-sub); text-transform: uppercase; margin-top: 4px;}
 
-    /* 3. Actions */
+    /* ✅ Actions Row (3 Columns) */
     .bento-actions-row {
       display: grid;
       grid-template-columns: repeat(3, 1fr);
@@ -141,18 +128,21 @@
     }
     .bento-action {
       background: var(--card-bg);
+      border-radius: var(--radius-lg);
       box-shadow: 0 4px 12px rgba(0,0,0,0.03);
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 10px;
-      padding: 16px 10px;
+      gap: 8px;
+      padding: 16px 8px;
+      border: none;
+      cursor: pointer;
     }
     .bento-action .icon {
-      width: 44px; height: 44px; border-radius: 14px;
+      width: 40px; height: 40px; border-radius: 12px;
       display: flex; align-items: center; justify-content: center; font-size: 20px;
     }
-    .bento-action .title { font-size: 14px; font-weight: 700; color: var(--text-main); text-align: center;}
+    .bento-action .title { font-size: 13px; font-weight: 700; color: var(--text-main); }
     
     .bg-teal { background: #E6F9F0; }
     .bg-pink { background: #FFE5E9; }
@@ -184,7 +174,34 @@
       box-shadow: 0 6px 16px rgba(0, 113, 227, 0.4); cursor: pointer;
     }
 
-    /* Purane elements hide kar rahe hain taaki purani CSS interfere na kare */
+    /* Apple Style for JS generated content */
+    .history-item {
+      background: #FFFFFF !important;
+      border-radius: 16px !important;
+      border: none !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+      padding: 16px 20px !important;
+      margin-bottom: 8px !important;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .empty-state {
+      background: #FFFFFF !important;
+      border-radius: 16px !important;
+      border: 1px dashed #D1D1D6 !important;
+      padding: 24px !important;
+      text-align: center;
+    }
+    .info-card {
+      background: #FFFFFF !important;
+      border-radius: 16px !important;
+      padding: 16px !important;
+      margin-bottom: 8px !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.03) !important;
+    }
+
+    /* Purane elements hide */
     .app-header, .app-shell, .action-box, .header-top, .header-stats, .box-grid-2 { display: none !important; }
   </style>
 </head>
@@ -207,44 +224,46 @@
       <p>Ready to practice for your exams?</p>
     </div>
 
-    <!-- ✅ SAME OLD IDs (statTests, statAccuracy) -->
-    <div class="bento-grid">
-      <button class="bento-card bento-start" onclick="startExam()">
-        <div>
-          <div class="title">Start Exam</div>
-          <div class="sub">Full • Chapter • HOTS</div>
-        </div>
-        <div class="arrow">→</div>
-      </button>
+    <!-- Start Exam Card -->
+    <button class="bento-start" onclick="startExam()">
+      <div class="title">Start Exam</div>
+      <div class="sub">Full • Chapter • HOTS</div>
+      <div class="arrow">→</div>
+    </button>
 
-      <div class="bento-card bento-stat">
+    <!-- Stats Row (3 Columns with OLD IDs) -->
+    <div class="stats-row">
+      <div class="bento-stat">
         <div class="val" id="statTests">0</div>
         <div class="lbl">Tests</div>
       </div>
-
-      <div class="bento-card bento-stat">
+      <div class="bento-stat">
         <div class="val" id="statAccuracy">--</div>
         <div class="lbl">Accuracy</div>
       </div>
+      <div class="bento-stat">
+        <div class="val" id="statAvg">--</div>
+        <div class="lbl">Avg Time</div>
+      </div>
     </div>
 
-    <!-- Actions -->
+    <!-- Actions Row -->
     <div class="bento-actions-row">
-      <button class="bento-card bento-action" onclick="goTo('analyse.html')">
+      <button class="bento-action" onclick="goTo('analyse.html')">
         <div class="icon bg-teal">📊</div>
         <div class="title">Analyse</div>
       </button>
-      <button class="bento-card bento-action" onclick="goTo('mistakes.html')">
+      <button class="bento-action" onclick="goTo('mistakes.html')">
         <div class="icon bg-pink">❌</div>
         <div class="title">Mistakes</div>
       </button>
-      <button class="bento-card bento-action" onclick="goTo('practice.html')">
+      <button class="bento-action" onclick="goTo('practice.html')">
         <div class="icon bg-orange">🎯</div>
         <div class="title">Weak Areas</div>
       </button>
     </div>
 
-    <!-- ✅ SAME OLD ID (recentTests) -->
+    <!-- Recent History (OLD ID) -->
     <section style="margin-top: 24px;">
       <h3 class="section-title">Recent History</h3>
       <div id="recentTests"></div>
@@ -253,7 +272,7 @@
       </button>
     </section>
 
-    <!-- ✅ SAME OLD ID (weakChapters) -->
+    <!-- Weak Chapters (OLD ID) -->
     <section style="margin-top: 24px;">
       <h3 class="section-title">Weak Chapters</h3>
       <div id="weakChapters"></div>
@@ -261,7 +280,6 @@
 
   </main>
 
-  <!-- Fixed Bottom Nav -->
   <nav class="bottom-nav">
     <a class="nav-item active" href="dashboard.html">
       <span class="nav-icon">🏠</span>
