@@ -11,168 +11,229 @@
   <link rel="stylesheet" href="css/components.css" />
   <link rel="stylesheet" href="css/dashboard.css" />
 
+  <!-- ✅ NEW PREMIUM UI STYLES -->
   <style>
-    /* ✅ Header Fix: Scroll karne par header upar chala jayega (sticky nahi rahega) */
+    /* Clean Light Background */
+    body {
+      background: #F8FAFC !important; 
+    }
+
+    /* 1. CLEAN LIGHT HEADER (No more dark black) */
     .app-header {
-      position: relative !important; 
-      top: auto !important;
+      background: #FFFFFF !important;
+      color: #0F172A !important;
+      border-radius: 0 !important;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.05) !important;
+      position: relative !important;
+      padding: 20px !important;
+      border-bottom: 1px solid #E2E8F0 !important;
     }
-
-    /* Action Box Colors */
-    .action-box-deep-purple, .action-box-primary {
-      background: linear-gradient(135deg, #3B82F6 0%, #2563EB 100%) !important;
-      box-shadow: 0 8px 24px -6px rgba(37, 99, 235, 0.5) !important;
-    }
-    .action-box-teal {
-      background: linear-gradient(135deg, #10B981 0%, #059669 100%) !important;
-      box-shadow: 0 8px 24px -6px rgba(16, 185, 129, 0.5) !important;
-    }
-    .fab {
-      background: linear-gradient(135deg, #3B82F6, #2563EB) !important;
-      box-shadow: 0 6px 20px rgba(37, 99, 235, 0.45) !important;
-    }
-
-    /* Premium Brand Header */
     .brand-header {
       display: flex;
       align-items: center;
-      gap: 14px;
+      justify-content: space-between;
       margin-bottom: 24px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
     }
-    
-    /* Circular Logo Box */
+    .brand-left {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
     .brand-logo-circle {
-      width: 48px;
-      height: 48px;
-      background: #ffffff;
-      border-radius: 50%; 
+      width: 32px;
+      height: 32px;
+      background: #F8FAFC;
+      border-radius: 50%;
       display: flex;
       align-items: center;
       justify-content: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.15), 0 0 0 2px rgba(255,255,255,0.1);
-      overflow: hidden; /* Image circle se bahar na nikle */
+      border: 1px solid #E2E8F0;
     }
-    
-    /* ✅ Logo Size Badhaya (Circle ko pura cover karega) */
-    .brand-logo-circle img {
-      width: 36px; /* Pehle 28px tha, ab 36px kiya */
-      height: auto;
-      transform: scale(1.1); /* Thoda aur zoom kiya */
-    }
-    
+    .brand-logo-circle img { width: 22px; height: auto; }
     .brand-name {
-      font-size: 22px;
+      font-size: 18px;
       font-weight: 800;
-      color: #fff;
-      letter-spacing: -0.03em;
+      color: #0F172A;
       margin: 0;
+      letter-spacing: -0.03em;
     }
-    .brand-name span {
-      color: #60A5FA;
+    .brand-name span { color: #3B82F6; }
+    
+    .header-avatar {
+      width: 36px; height: 36px;
+      background: #3B82F6; color: #fff;
+      border: none; box-shadow: none;
     }
-    .brand-subtitle {
-      font-size: 11px;
-      color: rgba(255, 255, 255, 0.6);
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-top: 2px;
+
+    /* 2. COMBINED STATS CARD */
+    .premium-stats-card {
+      background: #FFFFFF;
+      border-radius: 20px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03);
+      border: 1px solid #E2E8F0;
+      margin-bottom: 24px;
     }
+    .stat-box { text-align: center; border-right: 1px solid #E2E8F0; }
+    .stat-box:last-child { border-right: none; }
+    .stat-box .v {
+      font-size: 22px; font-weight: 800; color: #0F172A; margin-bottom: 4px;
+    }
+    .stat-box .l {
+      font-size: 11px; font-weight: 600; color: #64748B; text-transform: uppercase; letter-spacing: 0.05em;
+    }
+
+    /* 3. HERO START EXAM CARD */
+    .hero-card {
+      background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+      border-radius: 24px;
+      padding: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      color: #fff;
+      box-shadow: 0 12px 32px -8px rgba(15, 23, 42, 0.4);
+      margin-bottom: 24px;
+      border: none;
+      width: 100%;
+      cursor: pointer;
+      text-align: left;
+    }
+    .hero-card:active { transform: scale(0.98); }
+    .hero-title { font-size: 20px; font-weight: 800; margin-bottom: 4px; }
+    .hero-sub { font-size: 13px; color: rgba(255,255,255,0.7); font-weight: 500; }
+    .hero-icon {
+      width: 56px; height: 56px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center; font-size: 24px;
+      border: 1px solid rgba(255,255,255,0.1);
+    }
+
+    /* 4. GRID CARDS (Analyse, Mistakes, Weak Areas) */
+    .premium-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 16px;
+      margin-bottom: 24px;
+    }
+    .premium-card {
+      background: #FFFFFF;
+      border: 1px solid #E2E8F0;
+      border-radius: 20px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+      cursor: pointer;
+      transition: transform 150ms ease;
+      text-align: left;
+    }
+    .premium-card:active { transform: scale(0.97); }
+    .card-icon {
+      width: 44px; height: 44px;
+      border-radius: 12px;
+      display: flex; align-items: center; justify-content: center; font-size: 20px;
+    }
+    /* Icon Backgrounds */
+    .bg-teal { background: #ECFDF5; color: #059669; }
+    .bg-rose { background: #FFF1F2; color: #E11D48; }
+    .bg-amber { background: #FFFBEB; color: #D97706; }
+
+    .premium-card .title { font-size: 16px; font-weight: 800; color: #0F172A; margin-bottom: 4px; }
+    .premium-card .sub { font-size: 12px; font-weight: 500; color: #64748B; }
+
+    /* Action Box overrides (removing old styles) */
+    .action-box, .fab, .box-grid-2 { display: none !important; }
   </style>
 </head>
 <body>
   <div class="app-shell">
-    <!-- Header ab scroll hone par fix nahi rahega -->
+    <!-- Clean Light Header -->
     <header class="app-header">
-      
       <div class="brand-header">
-        <div class="brand-logo-circle">
-          <img src="images/logo.png" alt="Perficiently Logo" />
-        </div>
-        <div>
+        <div class="brand-left">
+          <div class="brand-logo-circle">
+            <img src="images/logo.png" alt="Logo" />
+          </div>
           <h1 class="brand-name">Perficient<span>ly</span></h1>
-          <div class="brand-subtitle">Class 10 Study Platform</div>
         </div>
+        <div class="header-avatar" onclick="goTo('profile.html')">S</div>
       </div>
-
-      <div class="header-top">
-        <div class="header-greeting">
-          <h2 id="greetingName">Hi, Student 👋</h2>
-          <p>Class 10 • Perficiently</p>
-        </div>
-        <div class="header-avatar" id="userAvatar" onclick="goTo('profile.html')">S</div>
-      </div>
-
-      <div class="header-stats">
-        <div class="header-stat">
-          <div class="stat-value" id="statTests">0</div>
-          <div class="stat-label">Tests</div>
-        </div>
-        <div class="header-stat">
-          <div class="stat-value" id="statAccuracy">--</div>
-          <div class="stat-label">Accuracy</div>
-        </div>
-        <div class="header-stat">
-          <div class="stat-value" id="statAvg">--</div>
-          <div class="stat-label">Avg Time</div>
-        </div>
+      
+      <div class="header-greeting" style="margin-bottom:0;">
+        <h2 id="greetingName" style="color:#0F172A; font-size:24px;">Hi, Student 👋</h2>
+        <p style="color:#64748B;">Ready to practice for your Class 10 exams?</p>
       </div>
     </header>
 
-    <main class="app-main">
-      <section class="section">
-        <button class="action-box action-box-primary action-box-large" onclick="startExam()">
-          <div class="box-icon">🎯</div>
-          <div class="box-content">
-            <div class="box-title-large">Start Exam</div>
-            <div class="box-sub-large">Full • Chapter • HOTS • PYQ</div>
-          </div>
-          <div class="box-arrow">→</div>
-        </button>
-      </section>
-
-      <section class="section">
-        <button class="action-box action-box-teal action-box-medium" onclick="goTo('analyse.html')">
-          <div class="box-icon">📊</div>
-          <div class="box-content">
-            <div class="box-title">Analyse</div>
-            <div class="box-sub">Progress, stats, weak topics</div>
-          </div>
-          <div class="box-arrow">→</div>
-        </button>
-      </section>
-
-      <section class="section">
-        <div class="box-grid-2">
-          <button class="action-box action-box-rose" onclick="goTo('mistakes.html')">
-            <div class="box-icon">❌</div>
-            <div class="box-title">Mistakes</div>
-            <div class="box-sub">Review & redo</div>
-          </button>
-          <button class="action-box action-box-amber" onclick="goTo('practice.html')">
-            <div class="box-icon">🎯</div>
-            <div class="box-title">Weak Areas</div>
-            <div class="box-sub">Targeted practice</div>
-          </button>
+    <main class="app-main" style="padding: 24px;">
+      
+      <!-- Combined Stats -->
+      <div class="premium-stats-card">
+        <div class="stat-box">
+          <div class="v" id="statTests">0</div>
+          <div class="l">Tests</div>
         </div>
-      </section>
+        <div class="stat-box">
+          <div class="v" id="statAccuracy">--</div>
+          <div class="l">Accuracy</div>
+        </div>
+        <div class="stat-box">
+          <div class="v" id="statAvg">--</div>
+          <div class="l">Avg Time</div>
+        </div>
+      </div>
 
+      <!-- Hero Card -->
+      <button class="hero-card" onclick="startExam()">
+        <div>
+          <div class="hero-title">Start Exam</div>
+          <div class="hero-sub">Full • Chapter • HOTS • PYQ</div>
+        </div>
+        <div class="hero-icon">🎯</div>
+      </button>
+
+      <!-- Grid Cards -->
+      <div class="premium-grid">
+        <button class="premium-card" onclick="goTo('analyse.html')">
+          <div class="card-icon bg-teal">📊</div>
+          <div>
+            <div class="title">Analyse</div>
+            <div class="sub">Progress & stats</div>
+          </div>
+        </button>
+        <button class="premium-card" onclick="goTo('mistakes.html')">
+          <div class="card-icon bg-rose">❌</div>
+          <div>
+            <div class="title">Mistakes</div>
+            <div class="sub">Review & redo</div>
+          </div>
+        </button>
+        <button class="premium-card" onclick="goTo('practice.html')" style="grid-column: span 2; flex-direction: row; align-items: center;">
+          <div class="card-icon bg-amber">🎯</div>
+          <div>
+            <div class="title">Weak Areas</div>
+            <div class="sub">Targeted practice</div>
+          </div>
+        </button>
+      </div>
+
+      <!-- History (Basic kept same) -->
       <section class="section">
-        <h3 class="section-title">📜 Recent History</h3>
+        <h3 class="section-title" style="font-size:14px; color:#0F172A; text-transform:none;">Recent History</h3>
         <div id="recentTests"></div>
-        <button class="btn btn-ghost btn-block" style="margin-top:12px" onclick="goTo('history.html')">
+        <button class="btn btn-ghost btn-block" style="margin-top:12px; color:#3B82F6;" onclick="goTo('history.html')">
           See all history →
         </button>
       </section>
 
-      <section class="section">
-        <h3 class="section-title">🎯 Weak Chapters</h3>
-        <div id="weakChapters"></div>
-      </section>
     </main>
 
+    <!-- Bottom Nav (Kept same) -->
     <nav class="bottom-nav">
       <a class="nav-item active" href="dashboard.html">
         <span class="nav-icon">🏠</span>
